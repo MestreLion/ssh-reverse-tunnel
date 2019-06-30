@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=SSH Reverse Tunnel Indicator
+Name[pt]=Indicador do Túnel Reverso SSH
+Comment=Monitor SSH Reverse Tunnel status from panel
+Comment[pt]=Monitore o status do túnel reverso SSH através do painel
+Categories=System;Network;
+Terminal=false
+StartupNotify=true
+Icon=preferences-system-network
+Exec=ssh-reverse-tunnel-indicator

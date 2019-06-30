@@ -1,0 +1,241 @@
+#!/usr/bin/env python
+#
+# ssh-reverse-tunnel-indicator - Indicator applet for ssh-reverse-tunnel
+#
+#    Copyright (C) 2019 Rodrigo Silva (MestreLion) <linux@rodrigosilva.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program. See <http://www.gnu.org/licenses/gpl.html>
+
+import subprocess
+import os
+import os.path as osp
+import signal
+
+# sudo apt-get install pkg-config libcairo2-dev gcc python3-dev libgirepository1.0-dev
+# pip install gobject PyGObject
+from gi.repository import Gtk, GLib, GdkPixbuf, AppIndicator3 as AppIndicator
+
+
+__all__     = ['SSHReverseTunnelIndicator']
+__appname__ = 'SSH Reverse Tunnel Indicator'
+__version__ = '0.1'
+__appdesc__ = 'App Indicator for creating reverse SSH tunnels'
+__author__  = 'Rodrigo Silva'
+__url__     = 'http://github.com/MestreLion/scripts'
+
+
+
+class SSHReverseTunnelIndicator(object):
+    ICON_MAIN     = 'preferences-system-network'
+    ICON_ACTIVE   = 'gdu-smart-healthy'
+    ICON_INACTIVE = 'gdu-smart-unknown'
+    ICON_CONNECT  = 'gdu-smart-threshold'
+    ICON_ERROR    = 'gdu-smart-failing'
+
+    def __init__(self):
+        self.ind = AppIndicator.Indicator.new(
+            "indicator-sshreversetunnel",
+            self.ICON_MAIN,
+            AppIndicator.IndicatorCategory.APPLICATION_STATUS
+        )
+
+        self.ind.set_attention_icon(self.ICON_INACTIVE)  # optional
+        self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+
+        self.menu = {}
+        gtkmenu = Gtk.Menu()
+
+        def create_menu_item(item, gtkmenu):
+            if not item:
+                gtkmenu.append(Gtk.SeparatorMenuItem())
+                return
+
+            # Gtk.MenuItem(label) works without mnemonic
+            itm = Gtk.MenuItem.new_with_mnemonic(item[1])
+            hdl = getattr(self, 'do_' + item[0], None)
+            if hdl:
+                itm.connect("activate", hdl)
+            gtkmenu.append(itm)
+            self.menu[item[0]] = itm
+
+        for item in [
+            ['status',      ""],
+            [],
+            ['connect',     "_Connect"],
+            ['disconnect',  "_Disconnect"],
+            [],
+            ['about',       "_About {0}...".format(__appname__)],
+            [],
+            ['quit',        "_Quit"],
+        ]:
+            create_menu_item(item, gtkmenu)
+        gtkmenu.show_all()
+
+        self.menu['status'].set_sensitive(False)
+
+        self.ind.set_menu(gtkmenu)
+        self.about = None
+
+        self.command = self.find_command('ssh-reverse-tunnel')
+        self.update_labels()
+
+        GLib.timeout_add_seconds(5, self.update_labels)
+
+
+    def update_labels(self):
+        pid = self.check_status()
+        if pid:
+            self.set_active(pid)
+        else:
+            self.set_inactive()
+        return True  # returning False would deactivate update timer
+
+    def set_connecting(self):
+        self.menu['connect'].set_sensitive(False)
+        self.menu['status'].set_label('CONNECTING...')
+        self.ind.set_icon(self.ICON_CONNECT)
+
+    def set_active(self, pid=0):
+        self.active = True
+        self.menu['status'].set_label('CONNECTED [PID {0}]'.format(pid))
+        self.menu['connect'].set_sensitive(False)
+        self.menu['disconnect'].set_sensitive(True)
+        #self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+        self.ind.set_icon(self.ICON_ACTIVE)
+
+    def set_inactive(self, _=None):
+        self.active = False
+        self.menu['status'].set_label('DISCONNECTED')
+        self.menu['connect'].set_sensitive(True)
+        self.menu['disconnect'].set_sensitive(False)
+        #self.ind.set_status(AppIndicator.IndicatorStatus.ATTENTION)
+        self.ind.set_icon(self.ICON_INACTIVE)
+
+    def get_pid(self, output):
+        return int(''.join(output.strip().split(' ', 1)[0:1]))
+
+    def check_status(self, full=False):
+        try:
+            output = subprocess.check_output([self.command, '--status'])
+            pid = self.get_pid(output)
+        except subprocess.CalledProcessError:
+            output = ''
+            pid = 0
+        return output if full else pid
+
+    def do_connect(self, _):
+        self.set_connecting()
+        try:
+            subprocess.check_call([self.command, '--start'])
+        except subprocess.CalledProcessError:
+            # FIXME: sometimes command return status 1, too fast to create pid file?
+            raise
+
+    def do_disconnect(self, _):
+        try:
+            subprocess.check_call([self.command, '--close'])
+            self.set_inactive()
+        except subprocess.CalledProcessError:
+            raise
+
+    def do_about(self, _evt=None):
+        if not self.about:
+            about = Gtk.AboutDialog()
+            about.set_destroy_with_parent(True)
+            about.set_program_name(__appname__)
+            about.set_version(str(__version__))
+            about.set_logo(Gtk.IconTheme.get_default().load_icon(self.ICON_MAIN, 128, 0))  # ICON_LOOKUP_USE_BUILTIN
+            about.set_icon_name(self.ICON_MAIN)
+            about.set_comments(__appdesc__)
+            about.set_website(__url__)
+            about.set_website_label('{0} Website'.format(__appname__))
+            about.set_authors([__author__])
+            about.set_license_type(Gtk.License.GPL_3_0)
+            about.set_copyright('Copyright (C) 2019 Rodrigo Silva')
+            self.about = about
+        #TODO: disable minimize
+        self.about.run()
+        self.about.hide()
+
+    def do_quit(self, _):
+        Gtk.main_quit()
+
+
+    def find_command(self, command):
+        for path in (
+            os.path.join(_, command)
+            for _ in os.environ["PATH"].split(os.pathsep)
+        ):
+                if os.access(path, os.X_OK) and os.path.isfile(path):
+                    return path
+
+        # Fallback
+        return osp.join(osp.dirname(osp.realpath(__file__)), command)
+
+
+    # Unused, for reference only
+    def list_icons(self):
+        for icon in sorted(Gtk.IconTheme.get_default().list_icons(None)):
+            print(icon)
+
+    def main(self):
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        Gtk.main()
+
+
+if __name__ == "__main__":
+    ind = SSHReverseTunnelIndicator()
+    ind.main()
+
+# References:
+
+# AppIndicator.IndicatorCategory
+# 0 APPLICATION_STATUS - status of the application.
+# 1 COMMUNICATIONS     - communication with other people.
+# 2 SYSTEM_SERVICES    - relating to something in the user's system.
+# 3 HARDWARE           - relating to the user's hardware.
+# 4 OTHER              - none of the above. Don't use unless you really need it.
+
+# appindicator.IndicatorStatus
+# 0 PASSIVE   - not shown to the user
+# 1 ACTIVE    - shown in it's default state
+# 2 ATTENTION - show it's attention icon
+
+# Indicator template by Charl P. Botha <info@charlbotha.com>
+# https://bitbucket.org/cpbotha/indicator-cpuspeed
+
+# http://readthedocs.org/docs/python-gtk-3-tutorial/en/latest/index.html
+# http://developer.gnome.org/gtk3/stable/
+# http://developer.gnome.org/pygobject/stable/glib-functions.html
+# http://developer.ubuntu.com/api/ubuntu-12.04/c/appindicator/
+# http://developer.ubuntu.com/api/ubuntu-12.04/python/AppIndicator3-0.1.html
+
+# Icons
+# network-idle
+# network-offline
+# network-error
+# emblem-default
+# emblem-generic
+# emblem-important
+# network-workgroup
+# preferences-system-network
+# preferences-desktop-remote-desktop
+# gdu-smart-healthy   - Green
+# gdu-smart-failing   - Red
+# gdu-smart-threshold - Yellow
+# gdu-smart-unknown   - Gray
+# dialog-error    / error
+# dialog-warning  / important
+# dialog-question
+# info

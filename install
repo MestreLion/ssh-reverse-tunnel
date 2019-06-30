@@ -1,0 +1,17 @@
+#!/bin/bash
+
+myname="${0##*/}"
+mydir=$(dirname "$(readlink -f "$0")")
+
+exec=$mydir/ssh-reverse-tunnel
+indicator=${exec}-indicator
+autostart=${XDG_CONFIG_HOME:-$HOME/.config}/autostart
+desktop=${indicator}.desktop
+bin=${XDG_BIN_HOME:-$HOME/.local/bin}/${exec##*/}
+binind=${bin}-indicator
+
+rm -f -- "$bin"    && ln -s -- "$exec"      "$bin"
+rm -f -- "$binind" && ln -s -- "$indicator" "$binind"
+
+xdg-desktop-menu install --novendor "$desktop"
+cp -- "$desktop" "$autostart"
