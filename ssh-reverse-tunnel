@@ -91,4 +91,4 @@ export AUTOSSH_PIDFILE=$pidfile
 export AUTOSSH_PORT=$portoffset
 export SSH_AUTH_SOCK=0
 
-autossh -f -- -N -T -i "$keyfile" "${map[@]}" "${hostopts[@]}"
+autossh -f -- -N -T -i "$keyfile" "${hostopts[@]}" "${map[@]}"

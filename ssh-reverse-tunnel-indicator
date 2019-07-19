@@ -75,6 +75,8 @@ class SSHReverseTunnelIndicator(object):
             ['connect',     "_Connect"],
             ['disconnect',  "_Disconnect"],
             [],
+            ['info',        "Connection _Information"],
+            [],
             ['about',       "_About {0}...".format(__appname__)],
             [],
             ['quit',        "_Quit"],
@@ -109,6 +111,7 @@ class SSHReverseTunnelIndicator(object):
     def set_active(self, pid=0):
         self.active = True
         self.menu['status'].set_label('CONNECTED [PID {0}]'.format(pid))
+        self.menu['info'].set_sensitive(True)
         self.menu['connect'].set_sensitive(False)
         self.menu['disconnect'].set_sensitive(True)
         #self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
@@ -117,6 +120,7 @@ class SSHReverseTunnelIndicator(object):
     def set_inactive(self, _=None):
         self.active = False
         self.menu['status'].set_label('DISCONNECTED')
+        self.menu['info'].set_sensitive(False)
         self.menu['connect'].set_sensitive(True)
         self.menu['disconnect'].set_sensitive(False)
         #self.ind.set_status(AppIndicator.IndicatorStatus.ATTENTION)
@@ -149,6 +153,18 @@ class SSHReverseTunnelIndicator(object):
             self.set_inactive()
         except subprocess.CalledProcessError:
             raise
+
+    def do_info(self, _):
+        dialog = Gtk.MessageDialog(
+            None,  # Parent Window
+            0,     # Flags
+            Gtk.MessageType.INFO,
+            Gtk.ButtonsType.OK,
+            "SSH Reverse Tunnel Connection Information"
+        )
+        dialog.format_secondary_text(self.check_status(full=True).replace(' -R', '\n-R').replace('-- ', '--\n'))
+        dialog.run()
+        dialog.destroy()
 
     def do_about(self, _):
         if not self.about:
