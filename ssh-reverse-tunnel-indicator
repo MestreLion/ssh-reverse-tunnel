@@ -24,7 +24,7 @@ import signal
 
 # sudo apt-get install pkg-config libcairo2-dev gcc python3-dev libgirepository1.0-dev
 # pip install gobject PyGObject
-from gi.repository import Gtk, GLib, GdkPixbuf, AppIndicator3 as AppIndicator
+from gi.repository import Gtk, GLib, AppIndicator3 as AppIndicator
 
 
 __all__     = ['SSHReverseTunnelIndicator']
