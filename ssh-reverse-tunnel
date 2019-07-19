@@ -18,7 +18,7 @@
 #    along with this program. See <http://www.gnu.org/licenses/gpl.html>
 
 # Override settings in config file: ~/.config/ssh-reverse-tunnel.conf
-ports=(80 22)
+ports=(22 80 443)
 hostopts=(user@example.com -p 2222)
 portoffset=1000
 
