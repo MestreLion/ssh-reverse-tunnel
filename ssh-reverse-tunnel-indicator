@@ -34,6 +34,7 @@ __appdesc__ = 'App Indicator for creating reverse SSH tunnels'
 __author__  = 'Rodrigo Silva'
 __url__     = 'http://github.com/MestreLion/scripts'
 
+CONFIG = osp.join(osp.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config')), 'ssh-reverse-tunnel.conf')
 
 
 class SSHReverseTunnelIndicator(object):
@@ -76,6 +77,7 @@ class SSHReverseTunnelIndicator(object):
             ['disconnect',  "_Disconnect"],
             [],
             ['info',        "Connection _Information"],
+            ['edit',        "_Edit configuration..."],
             [],
             ['about',       "_About {0}...".format(__appname__)],
             [],
@@ -165,6 +167,9 @@ class SSHReverseTunnelIndicator(object):
         dialog.format_secondary_text(self.check_status(full=True).replace(' -R', '\n-R').replace('-- ', '--\n'))
         dialog.run()
         dialog.destroy()
+
+    def do_edit(self, _):
+        subprocess.check_call(['xdg-open', CONFIG])
 
     def do_about(self, _):
         if not self.about:
