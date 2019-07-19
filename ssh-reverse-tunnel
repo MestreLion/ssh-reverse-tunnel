@@ -20,7 +20,7 @@
 # Override settings in config file: ~/.config/ssh-reverse-tunnel.conf
 ports=(22 80 443)
 hostopts=(user@example.com -p 2222)
-portoffset=1000
+portoffset=10000
 
 config=${XDG_CONFIG_HOME:-$HOME/.config}/ssh-reverse-tunnel.conf
 keyfile=$HOME/.ssh/id_rsa.nopassword
