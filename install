@@ -10,6 +10,10 @@ desktop=${indicator}.desktop
 bin=${XDG_BIN_HOME:-$HOME/.local/bin}/${exec##*/}
 binind=${bin}-indicator
 
+if ! type autossh >/dev/null 2>&1; then
+	sudo apt install -y -- autossh
+fi
+
 rm -f -- "$bin"    && ln -s -- "$exec"      "$bin"
 rm -f -- "$binind" && ln -s -- "$indicator" "$binind"
 
