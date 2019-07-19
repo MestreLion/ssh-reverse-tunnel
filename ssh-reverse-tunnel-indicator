@@ -134,6 +134,7 @@ class SSHReverseTunnelIndicator(object):
             pid = 0
         return output if full else pid
 
+
     def do_connect(self, _):
         self.set_connecting()
         try:
@@ -149,7 +150,7 @@ class SSHReverseTunnelIndicator(object):
         except subprocess.CalledProcessError:
             raise
 
-    def do_about(self, _evt=None):
+    def do_about(self, _):
         if not self.about:
             about = Gtk.AboutDialog()
             about.set_destroy_with_parent(True)
