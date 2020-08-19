@@ -23,7 +23,7 @@ hostopts=(user@example.com -p 2222)
 portoffset=10000
 
 config=${XDG_CONFIG_HOME:-$HOME/.config}/ssh-reverse-tunnel.conf
-keyfile=$HOME/.ssh/id_rsa.nopassword
+keyfile=$HOME/.ssh/id_rsa.ssh-reverse-tunnel.nopassword
 pidfile=$HOME/.ssh/ssh-reverse-tunnel.pid
 
 # Read config or create a default one
@@ -70,7 +70,7 @@ fi
 
 # Create a password-less SSH key and upload to server
 if ! [[ -f "$keyfile" ]]; then
-	ssh-keygen -f "$keyfile" -P ""
+	ssh-keygen -f "$keyfile" -P "" -C "${USER}.ssh-reverse-tunnel.nopassword@$HOSTNAME"
 	chmod 0600 -- "$keyfile"
 	chmod 0644 -- "$keyfile".pub
 	ssh-copy-id -i "$keyfile" "${hostopts[@]}"
