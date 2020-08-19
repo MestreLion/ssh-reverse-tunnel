@@ -34,8 +34,6 @@ __appdesc__ = 'App Indicator for creating reverse SSH tunnels'
 __author__  = 'Rodrigo Silva'
 __url__     = 'http://github.com/MestreLion/scripts'
 
-CONFIG = osp.join(osp.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config')), 'ssh-reverse-tunnel.conf')
-
 
 class SSHReverseTunnelIndicator(object):
     ICON_MAIN     = 'preferences-system-network'
@@ -43,6 +41,11 @@ class SSHReverseTunnelIndicator(object):
     ICON_INACTIVE = 'gdu-smart-unknown'
     ICON_CONNECT  = 'gdu-smart-threshold'
     ICON_ERROR    = 'gdu-smart-failing'
+
+    CONFIG = osp.join(
+        osp.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config')),
+        'ssh-reverse-tunnel.conf'
+    )
 
     def __init__(self):
         self.ind = AppIndicator.Indicator.new(
@@ -89,6 +92,7 @@ class SSHReverseTunnelIndicator(object):
         self.menu['status'].set_sensitive(False)
 
         self.ind.set_menu(gtkmenu)
+        self.info  = None
         self.about = None
 
         self.command = self.find_command('ssh-reverse-tunnel')
@@ -119,7 +123,7 @@ class SSHReverseTunnelIndicator(object):
         #self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
         self.ind.set_icon(self.ICON_ACTIVE)
 
-    def set_inactive(self, _=None):
+    def set_inactive(self):
         self.active = False
         self.menu['status'].set_label('DISCONNECTED')
         self.menu['info'].set_sensitive(False)
@@ -141,7 +145,7 @@ class SSHReverseTunnelIndicator(object):
         return output if full else pid
 
 
-    def do_connect(self, _):
+    def do_connect(self, _hdl=None):
         self.set_connecting()
         try:
             subprocess.check_call([self.command, '--start'])
@@ -149,29 +153,35 @@ class SSHReverseTunnelIndicator(object):
             # FIXME: sometimes command return status 1, too fast to create pid file?
             raise
 
-    def do_disconnect(self, _):
+    def do_disconnect(self, _hdl=None):
         try:
             subprocess.check_call([self.command, '--close'])
             self.set_inactive()
         except subprocess.CalledProcessError:
             raise
 
-    def do_info(self, _):
-        dialog = Gtk.MessageDialog(
+    def do_info(self, _hdl=None):
+        if self.info:
+            self.info.present()
+            return
+        def r(s): return s.replace(' -R', '\n-R').replace('-- ', '--\n')
+        info = Gtk.MessageDialog(
             None,  # Parent Window
             0,     # Flags
             Gtk.MessageType.INFO,
             Gtk.ButtonsType.OK,
             "SSH Reverse Tunnel Connection Information"
         )
-        dialog.format_secondary_text(self.check_status(full=True).replace(' -R', '\n-R').replace('-- ', '--\n'))
-        dialog.run()
-        dialog.destroy()
+        info.format_secondary_text(r(self.check_status(full=True)))
+        self.info = info
+        self.info.run()
+        self.info.destroy()
+        self.info = None
 
-    def do_edit(self, _):
-        subprocess.check_call(['xdg-open', CONFIG])
+    def do_edit(self, _hdl=None):
+        subprocess.check_call(['xdg-open', self.CONFIG])
 
-    def do_about(self, _):
+    def do_about(self, _hdl=None):
         if not self.about:
             about = Gtk.AboutDialog()
             about.set_destroy_with_parent(True)
@@ -185,19 +195,30 @@ class SSHReverseTunnelIndicator(object):
             about.set_authors([__author__])
             about.set_license_type(Gtk.License.GPL_3_0)
             about.set_copyright('Copyright (C) 2019 Rodrigo Silva')
+            about.visible = False  # Custom attribute
             self.about = about
+        if self.about.visible:
+            self.about.present()
+            return
         #TODO: disable minimize
+        self.about.visible = True
         self.about.run()
         self.about.hide()
+        self.about.visible = False
 
-    def do_quit(self, _):
-        Gtk.main_quit()
+    def do_quit(self, hdl=None):
+        if (not self.about or not self.about.visible) and not self.info:
+            Gtk.main_quit()
+        if self.info:
+            self.do_info(hdl)
+        if self.about and self.about.visible:
+            self.do_about(hdl)
 
 
     def find_command(self, command):
         for path in (
-            os.path.join(_, command)
-            for _ in os.environ["PATH"].split(os.pathsep)
+            os.path.join(__, command)
+            for __ in os.environ["PATH"].split(os.pathsep)
         ):
                 if os.access(path, os.X_OK) and os.path.isfile(path):
                     return path
