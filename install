@@ -21,6 +21,13 @@ mkdir --parents -- "$bindir"
 rm -f -- "$bin"    && ln -s -- "$exec"      "$bin"
 rm -f -- "$binind" && ln -s -- "$indicator" "$binind"
 
+
+for icon in "$mydir"/*.png; do
+	xdg-icon-resource install --noupdate --novendor --size 16 "$icon"
+done
+xdg-icon-resource forceupdate
+
+
 mkdir --parents --mode 700 -- "$autostart"
 xdg-desktop-menu install --novendor "$desktop"
 cp -- "$desktop" "$autostart"

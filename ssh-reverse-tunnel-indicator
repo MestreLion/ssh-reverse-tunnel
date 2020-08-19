@@ -24,6 +24,8 @@ import signal
 
 # sudo apt-get install pkg-config libcairo2-dev gcc python3-dev libgirepository1.0-dev
 # pip install gobject PyGObject
+import gi
+gi.require_versions({'Gtk': '3.0', 'AppIndicator3': '0.1'})
 from gi.repository import Gtk, GLib, AppIndicator3 as AppIndicator
 
 
@@ -37,10 +39,10 @@ __url__     = 'http://github.com/MestreLion/scripts'
 
 class SSHReverseTunnelIndicator(object):
     ICON_MAIN     = 'preferences-system-network'
-    ICON_ACTIVE   = 'gdu-smart-healthy'
-    ICON_INACTIVE = 'gdu-smart-unknown'
-    ICON_CONNECT  = 'gdu-smart-threshold'
-    ICON_ERROR    = 'gdu-smart-failing'
+    ICON_ACTIVE   = 'ssh-reverse-tunnel-active'
+    ICON_INACTIVE = 'ssh-reverse-tunnel-inactive'
+    ICON_CONNECT  = 'ssh-reverse-tunnel-connect'
+    ICON_ERROR    = 'ssh-reverse-tunnel-error'
 
     CONFIG = osp.join(
         osp.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config')),
