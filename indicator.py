@@ -21,6 +21,7 @@ import subprocess
 import os
 import os.path as osp
 import signal
+import sys
 
 # sudo apt-get install pkg-config libcairo2-dev gcc python3-dev libgirepository1.0-dev
 # pip install gobject PyGObject
@@ -35,6 +36,8 @@ __version__ = '0.1'
 __appdesc__ = 'App Indicator for creating reverse SSH tunnels'
 __author__  = 'Rodrigo Silva'
 __url__     = 'http://github.com/MestreLion/scripts'
+
+PY3 = sys.version_info[0] >= 3
 
 
 class SSHReverseTunnelIndicator(object):
@@ -139,7 +142,8 @@ class SSHReverseTunnelIndicator(object):
 
     def check_status(self, full=False):
         try:
-            output = subprocess.check_output([self.command, '--status'])
+            kwargs = dict(universal_newlines=True) if PY3 else {}
+            output = subprocess.check_output([self.command, '--status'], **kwargs)
             pid = self.get_pid(output)
         except subprocess.CalledProcessError:
             output = ''
