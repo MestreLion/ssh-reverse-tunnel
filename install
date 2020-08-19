@@ -7,15 +7,20 @@ exec=$mydir/ssh-reverse-tunnel
 indicator=${exec}-indicator
 autostart=${XDG_CONFIG_HOME:-$HOME/.config}/autostart
 desktop=${indicator}.desktop
-bin=${XDG_BIN_HOME:-$HOME/.local/bin}/${exec##*/}
+bindir=${XDG_BIN_HOME:-$HOME/.local/bin}
+bin=$bindir/${exec##*/}
 binind=${bin}-indicator
 
 if ! type autossh >/dev/null 2>&1; then
 	sudo apt install -y -- autossh
 fi
 
+# sudo apt install gir1.2-appindicator3-0.1
+
+mkdir --parents -- "$bindir"
 rm -f -- "$bin"    && ln -s -- "$exec"      "$bin"
 rm -f -- "$binind" && ln -s -- "$indicator" "$binind"
 
+mkdir --parents --mode 700 -- "$autostart"
 xdg-desktop-menu install --novendor "$desktop"
 cp -- "$desktop" "$autostart"
