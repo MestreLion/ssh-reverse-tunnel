@@ -58,7 +58,9 @@ ssh_status() {
 
 if [[ "${1:-}" ]]; then
 	case "$1" in
-	-h|--help  ) echo -e 'Create or close multiple SSH reverse tunnels\nUsage: ssh-reverse-tunnel [-c|-s]' >&2; exit;;
+	-h|--help  ) echo -e 'Create or close multiple SSH reverse tunnels\n'\
+	                     'Usage: ssh-reverse-tunnel [--close|--status]'
+	             exit;;
 	-c|--close ) ssh_close; exit;;
 	-q|--quit  ) ssh_close; exit;;
 	   --stop  ) ssh_close; exit;;
