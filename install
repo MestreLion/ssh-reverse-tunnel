@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -Eeuo pipefail  # exit on any error
+trap '>&2 echo "error: line $LINENO, status $?: $BASH_COMMAND"' ERR
 
 myname="${0##*/}"
 mydir=$(dirname "$(readlink -f "$0")")
@@ -10,6 +13,8 @@ desktop=${indicator}.desktop
 bindir=${XDG_BIN_HOME:-$HOME/.local/bin}
 bin=$bindir/${exec##*/}
 binind=${bin}-indicator
+icondir=${XDG_DATA_HOME:-$HOME/.local/share}/icons
+svgdir=$icondir/hicolor/scalable/apps
 
 if ! type autossh >/dev/null 2>&1; then
 	sudo apt install -y -- autossh
@@ -17,14 +22,24 @@ fi
 
 # sudo apt install gir1.2-appindicator3-0.1
 
+config=${SSH_REVERSE_TUNNEL_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/ssh-reverse-tunnel.conf}
+# Read config or create a default one
+if [[ ! -f "$config" ]]; then
+	cat > "$config" <<-EOF
+		# ssh-reverse-tunnel settings
+		ports=(${ports[@]})
+		hostopts=(${hostopts[@]})
+		portoffset=$portoffset
+	EOF
+fi
+
 mkdir --parents -- "$bindir"
 rm -f -- "$bin"    && ln -s -- "$exec"      "$bin"
 rm -f -- "$binind" && ln -s -- "$indicator" "$binind"
 
 
-for icon in "$mydir"/*.png; do
-	xdg-icon-resource install --noupdate --novendor --size 16 "$icon"
-done
+# xdg-icon-resource does not support SVG, so...
+install -D --target-directory "$svgdir" -- "$mydir"/icons/*.svg
 xdg-icon-resource forceupdate
 
 
