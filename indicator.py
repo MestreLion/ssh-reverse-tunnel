@@ -26,8 +26,15 @@ import sys
 # sudo apt-get install pkg-config libcairo2-dev gcc python3-dev libgirepository1.0-dev
 # pip install gobject PyGObject
 import gi
-gi.require_versions({'Gtk': '3.0', 'AppIndicator3': '0.1'})
-from gi.repository import Gtk, GLib, AppIndicator3 as AppIndicator
+gi.require_versions({
+    'Gtk': '3.0',
+    'AppIndicator3': '0.1',
+})
+from gi.repository import (
+    Gtk,
+    GLib,
+    AppIndicator3 as AppIndicator
+)
 
 
 __all__     = ['SSHReverseTunnelIndicator']
@@ -102,6 +109,7 @@ class SSHReverseTunnelIndicator(object):
 
         self.command = self.find_command('ssh-reverse-tunnel')
         self.update_labels()
+        self.do_connect()
 
         GLib.timeout_add_seconds(5, self.update_labels)
 
@@ -269,22 +277,3 @@ if __name__ == "__main__":
 # http://developer.gnome.org/pygobject/stable/glib-functions.html
 # http://developer.ubuntu.com/api/ubuntu-12.04/c/appindicator/
 # http://developer.ubuntu.com/api/ubuntu-12.04/python/AppIndicator3-0.1.html
-
-# Icons
-# network-idle
-# network-offline
-# network-error
-# emblem-default
-# emblem-generic
-# emblem-important
-# network-workgroup
-# preferences-system-network
-# preferences-desktop-remote-desktop
-# gdu-smart-healthy   - Green
-# gdu-smart-failing   - Red
-# gdu-smart-threshold - Yellow
-# gdu-smart-unknown   - Gray
-# dialog-error    / error
-# dialog-warning  / important
-# dialog-question
-# info
