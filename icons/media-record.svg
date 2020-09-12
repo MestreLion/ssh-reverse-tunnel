@@ -21,7 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -30,30 +30,42 @@
      bordercolor="#666666"
      borderopacity="1"
      objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
+     gridtolerance="30"
+     guidetolerance="20"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="640"
      inkscape:window-height="480"
      id="namedview34"
      showgrid="true"
-     inkscape:zoom="47.956"
-     inkscape:cx="7.4863"
-     inkscape:cy="11"
-     inkscape:current-layer="svg32">
+     inkscape:zoom="37.823"
+     inkscape:cx="9.7064"
+     inkscape:cy="11.057"
+     inkscape:current-layer="svg32"
+     inkscape:pagecheckerboard="false"
+     borderlayer="true"
+     showguides="true"
+     inkscape:snap-tangential="true"
+     inkscape:snap-perpendicular="true"
+     inkscape:snap-to-guides="false"
+     inkscape:snap-page="true">
     <inkscape:grid
        type="xygrid"
-       id="grid843" />
+       id="grid843"
+       originx="11"
+       originy="11"
+       empspacing="2"
+       spacingx="0.5"
+       spacingy="0.5" />
   </sodipodi:namedview>
   <defs
      id="defs22">
     <linearGradient
        id="A"
-       x1="14.365"
-       x2="16.473"
-       y1="10.657"
-       y2="18.425"
+       x1="9"
+       x2="11.5"
+       y1="4.5"
+       y2="13.5"
        gradientUnits="userSpaceOnUse">
       <stop
          offset="0"
@@ -65,14 +77,14 @@
          id="stop4" />
     </linearGradient>
     <radialGradient
-       cx="13.982"
-       cy="13.065"
-       fx="13.982"
-       fy="13.065"
-       gradientTransform="matrix(-1.0878712,1.9717112e-4,0,0.6045616,24.142681,0.24396)"
+       cx="9.5"
+       cy="7.5"
+       fx="9.5"
+       fy="7.5"
        id="B"
-       r="5.969"
-       gradientUnits="userSpaceOnUse">
+       r="6"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0,-0.5,1,0,2,12.25)">
       <stop
          offset="0"
          stop-color="#fff"
@@ -85,10 +97,10 @@
     </radialGradient>
     <linearGradient
        id="C"
-       x1="9.939"
-       x2="13.577"
-       y1="6.998"
-       y2="28.507"
+       x1="6"
+       x2="11"
+       y1="3.5"
+       y2="22"
        gradientUnits="userSpaceOnUse">
       <stop
          offset="0"
@@ -101,12 +113,12 @@
          id="stop14" />
     </linearGradient>
     <radialGradient
-       cx="15.866"
-       cy="20.411"
-       fx="15.866"
-       fy="20.411"
+       cx="11"
+       cy="15"
+       fx="11"
+       fy="15"
        id="D"
-       r="7.59"
+       r="7.5"
        gradientUnits="userSpaceOnUse">
       <stop
          offset="0"
@@ -119,35 +131,27 @@
     </radialGradient>
   </defs>
   <circle
-     transform="matrix(1.194944 0 0 1.195702 -8.45629 -7.78907)"
-     cx="15.866"
-     cy="16.134"
-     r="7.115"
-     opacity=".4"
-     fill="url(#A)"
-     id="circle24" />
+     cx="11"
+     cy="11"
+     id="circle24"
+     style="opacity:0.4;fill:url(#A);stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke:none"
+     r="8.5" />
   <circle
-     transform="matrix(.983699 0 0 .984324 -5.10474 -4.37862)"
-     cx="15.866"
-     cy="16.134"
-     r="7.115"
-     fill="url(#D)"
-     stroke="#a40000"
-     stroke-width="1.016"
-     id="circle26" />
+     id="circle26"
+     style="fill:url(#D);stroke:#a40000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
+     r="7"
+     cy="11"
+     cx="11" />
   <path
-     d="M11.02 6.906c-2.012-.302-3.944.94-4.52 2.888a4.08 4.08 0 0 0 2.965 2.569c2.102.453 4.17-.804 4.77-2.834a4.08 4.08 0 0 0-2.965-2.57l-.25-.054z"
-     opacity=".64"
-     fill="url(#B)"
-     id="path28" />
+     d="M 11,6.5 C 8.5,6.5 7.5,8 7,9 c 0.5,1 1.5,2.5 4,2.5 2.5,0 3.5,-1.5 4,-2.5 C 14.5,8 13.5,6.5 11,6.5 Z"
+     id="path28"
+     style="opacity:0.64;fill:url(#B)"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="ccccc" />
   <circle
-     transform="matrix(.843588 0 0 .844126 -2.88177 -2.11662)"
-     cx="15.866"
-     cy="16.134"
-     r="7.115"
-     opacity=".545"
-     fill="none"
-     stroke="url(#C)"
-     stroke-width="1.185"
-     id="circle30" />
+     cx="11"
+     cy="11"
+     id="circle30"
+     style="opacity:0.545;fill:none;stroke:url(#C);stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
+     r="6" />
 </svg>
