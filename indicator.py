@@ -47,7 +47,7 @@ from gi.repository import (
 
 __all__     = ['SSHReverseTunnelIndicator']
 __appname__ = 'SSH Reverse Tunnel Indicator'
-__version__ = '0.1'
+__version__ = '1.0'
 __appdesc__ = 'App Indicator for creating reverse SSH tunnels'
 __author__  = 'Rodrigo Silva'
 __url__     = 'http://github.com/MestreLion/ssh-reverse-tunnel'
