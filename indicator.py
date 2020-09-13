@@ -42,7 +42,7 @@ __appname__ = 'SSH Reverse Tunnel Indicator'
 __version__ = '0.1'
 __appdesc__ = 'App Indicator for creating reverse SSH tunnels'
 __author__  = 'Rodrigo Silva'
-__url__     = 'http://github.com/MestreLion/scripts'
+__url__     = 'http://github.com/MestreLion/ssh-reverse-tunnel'
 
 PY3 = sys.version_info[0] >= 3
 
