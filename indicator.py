@@ -194,8 +194,8 @@ class SSHReverseTunnelIndicator(object):
         if not self.info:
             # Create the dialog. Done at most only once per run
             info = Gtk.MessageDialog(
-                None,  # Parent Window
-                0,  # flags; Gtk.DialogFlags.MODAL does not work without parent
+                None,  # Parent Window hdl
+                0,     # Gtk.DialogFlags. MODAL does not work without parent
                 Gtk.MessageType.INFO,
                 Gtk.ButtonsType.OK,
                 "SSH Reverse Tunnel Connection Information"
@@ -230,7 +230,11 @@ class SSHReverseTunnelIndicator(object):
             about.set_destroy_with_parent(True)
             about.set_program_name(__appname__)
             about.set_version(str(__version__))
-            about.set_logo(Gtk.IconTheme.get_default().load_icon(self.ICON_MAIN, 128, 0))  # ICON_LOOKUP_USE_BUILTIN
+            about.set_logo(Gtk.IconTheme.get_default().load_icon(
+                self.ICON_MAIN,  # icon_name
+                128,             # size (requested, actual might be different)
+                0                # Gtk.IconLookupFlags. Consider USE_BUILTIN
+            ))
             about.set_icon_name(self.ICON_MAIN)
             about.set_comments(__appdesc__)
             about.set_website(__url__)
