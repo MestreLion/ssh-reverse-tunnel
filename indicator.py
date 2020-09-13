@@ -17,6 +17,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. See <http://www.gnu.org/licenses/gpl.html>
 
+# References for PyGobject API, gi modules and AppIndicator:
+# https://lazka.github.io/pgi-docs/
+# https://developer.gnome.org/pygobject/stable/
+# https://readthedocs.org/docs/python-gtk-3-tutorial/en/latest/index.html
+# https://wiki.ubuntu.com/DesktopExperienceTeam/ApplicationIndicators
+# https://github.com/canonical-web-and-design/older-apis
+
 import subprocess
 import os
 import os.path as osp
@@ -24,8 +31,6 @@ import signal
 import sys
 import time
 
-# sudo apt-get install pkg-config libcairo2-dev gcc python3-dev libgirepository1.0-dev
-# pip install gobject PyGObject
 import gi
 gi.require_versions({
     'AppIndicator3': '0.1',
@@ -274,26 +279,3 @@ class SSHReverseTunnelIndicator(object):
 if __name__ == "__main__":
     ind = SSHReverseTunnelIndicator()
     ind.main()
-
-# References:
-
-# AppIndicator.IndicatorCategory
-# 0 APPLICATION_STATUS - status of the application.
-# 1 COMMUNICATIONS     - communication with other people.
-# 2 SYSTEM_SERVICES    - relating to something in the user's system.
-# 3 HARDWARE           - relating to the user's hardware.
-# 4 OTHER              - none of the above. Don't use unless you really need it.
-
-# appindicator.IndicatorStatus
-# 0 PASSIVE   - not shown to the user
-# 1 ACTIVE    - shown in it's default state
-# 2 ATTENTION - show it's attention icon
-
-# Indicator template by Charl P. Botha <info@charlbotha.com>
-# https://bitbucket.org/cpbotha/indicator-cpuspeed
-
-# http://readthedocs.org/docs/python-gtk-3-tutorial/en/latest/index.html
-# http://developer.gnome.org/gtk3/stable/
-# http://developer.gnome.org/pygobject/stable/glib-functions.html
-# http://developer.ubuntu.com/api/ubuntu-12.04/c/appindicator/
-# http://developer.ubuntu.com/api/ubuntu-12.04/python/AppIndicator3-0.1.html
