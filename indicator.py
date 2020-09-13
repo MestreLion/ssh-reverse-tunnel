@@ -183,28 +183,36 @@ class SSHReverseTunnelIndicator(object):
             raise
 
     def do_info(self, _hdl=None):
-        if self.info:
-            self.info.present_with_time(time.time())  # includes .show()
-            return
-
         def r(s):
             return s.replace(' -R', '\n-R').replace('-- ', '--\n')
 
-        # TODO: create only once, then just update info, like do_about()
-        info = Gtk.MessageDialog(
-            None,  # Parent Window
-            Gtk.DialogFlags.MODAL,  # Flags
-            Gtk.MessageType.INFO,
-            Gtk.ButtonsType.OK,
-            "SSH Reverse Tunnel Connection Information"
-        )
-        info.format_secondary_text(r(self.check_status(full=True)))
-        info.props.skip_pager_hint = False  # revert MessageDialog() default. seems useless
-        info.present_with_time(time.time())  # required to make sure it shows
-        self.info = info  # to prevent multiple dialogs on every do_info()
-        self.info.run()  # blocks until OK button or close window
-        self.info.destroy()
-        self.info = None
+        if not self.info:
+            # Create the dialog. Done at most only once per run
+            info = Gtk.MessageDialog(
+                None,  # Parent Window
+                0,  # flags; Gtk.DialogFlags.MODAL does not work without parent
+                Gtk.MessageType.INFO,
+                Gtk.ButtonsType.OK,
+                "SSH Reverse Tunnel Connection Information"
+            )
+            # Revert MessageDialog() default. Seems useless, so disabled
+            #info.props.skip_pager_hint = False
+            info.is_running = False  # Custom attribute
+            self.info = info  # reuse this dialog on every do_info()
+
+        # Update info content and show dialog
+        self.info.format_secondary_text(r(self.check_status(full=True)))
+        self.info.present_with_time(time.time())  # includes .show()
+
+        # If already created and not hidden, nothing else to do
+        if self.info.is_running:
+            return
+
+        # Dialog is hidden, display again and block until OK button or close
+        self.info.is_running = True
+        self.info.run()  # Blocks. Also prints Gtk warning about no parent
+        self.info.hide() # Don't .destroy(), just .hide() so it can be reused
+        self.info.is_running = False
 
 
     def do_edit(self, _hdl=None):
