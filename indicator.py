@@ -28,13 +28,16 @@ import time
 # pip install gobject PyGObject
 import gi
 gi.require_versions({
-    'Gtk': '3.0',
     'AppIndicator3': '0.1',
+    'Gio': '2.0',
+    'GLib': '2.0',
+    'Gtk': '3.0',
 })
 from gi.repository import (
-    Gtk,
+    AppIndicator3 as AppIndicator,
+    Gio,  # for settings
     GLib,
-    AppIndicator3 as AppIndicator
+    Gtk,
 )
 
 
@@ -59,6 +62,7 @@ class SSHReverseTunnelIndicator(object):
         osp.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config')),
         'ssh-reverse-tunnel.conf'
     )
+    SETTINGS = 'com.rodrigosilva.ssh-reverse-tunnel'
 
     def __init__(self):
         self.ind = AppIndicator.Indicator.new(
@@ -107,6 +111,7 @@ class SSHReverseTunnelIndicator(object):
         self.ind.set_menu(gtkmenu)
         self.info  = None
         self.about = None
+        self.settings = Gio.Settings#.new(self.SETTINGS)  # for auto-connect
 
         self.command = self.find_command('ssh-reverse-tunnel')
         self.update_labels()
