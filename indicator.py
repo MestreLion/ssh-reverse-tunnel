@@ -115,7 +115,9 @@ class SSHReverseTunnelIndicator(object):
 
         self.command = self.find_command('ssh-reverse-tunnel')
         self.update_labels()
-        self.do_connect()
+
+        if not self.check_status():
+            self.do_connect()
 
         GLib.timeout_add_seconds(5, self.update_labels)
 
