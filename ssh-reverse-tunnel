@@ -70,12 +70,17 @@ if [[ "${1:-}" ]]; then
 	esac
 fi
 
-# Create a password-less SSH key and upload to server
-if ! [[ -f "$keyfile" ]]; then
-	ssh-keygen -f "$keyfile" -P "" -C "${USER}.ssh-reverse-tunnel.nopassword@$HOSTNAME"
-	chmod 0600 -- "$keyfile"
-	chmod 0644 -- "$keyfile".pub
-	ssh-copy-id -i "$keyfile" "${hostopts[@]}"
+keyargs=()
+if [[ "$keyfile" ]]; then
+	# Create a password-less SSH key and upload to server
+	if ! [[ -f "$keyfile" ]]; then
+		ssh-keygen -f "$keyfile" -P "" \
+			-C "${USER}.ssh-reverse-tunnel.nopassword@${HOSTNAME}"
+		chmod 0600 -- "$keyfile"
+		chmod 0644 -- "$keyfile".pub
+		ssh-copy-id -i "$keyfile" "${hostopts[@]}"
+	fi
+	keyargs+=(-i "$keyfile")
 fi
 
 # Map remote ports using the rule: remote port = local port + port offset
@@ -93,4 +98,4 @@ export AUTOSSH_PIDFILE=$pidfile
 export AUTOSSH_PORT=$portoffset
 export SSH_AUTH_SOCK=0
 
-autossh -f -- -N -T -i "$keyfile" "${hostopts[@]}" "${map[@]}"
+autossh -f -- -N -T "${keyargs[@]}" "${hostopts[@]}" "${map[@]}"
