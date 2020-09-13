@@ -22,6 +22,7 @@ import os
 import os.path as osp
 import signal
 import sys
+import time
 
 # sudo apt-get install pkg-config libcairo2-dev gcc python3-dev libgirepository1.0-dev
 # pip install gobject PyGObject
@@ -176,21 +177,27 @@ class SSHReverseTunnelIndicator(object):
 
     def do_info(self, _hdl=None):
         if self.info:
-            self.info.present()
+            self.info.present_with_time(time.time())  # includes .show()
             return
-        def r(s): return s.replace(' -R', '\n-R').replace('-- ', '--\n')
+
+        def r(s):
+            return s.replace(' -R', '\n-R').replace('-- ', '--\n')
+
         info = Gtk.MessageDialog(
             None,  # Parent Window
-            0,     # Flags
+            Gtk.DialogFlags.MODAL,  # Flags
             Gtk.MessageType.INFO,
             Gtk.ButtonsType.OK,
             "SSH Reverse Tunnel Connection Information"
         )
         info.format_secondary_text(r(self.check_status(full=True)))
-        self.info = info
-        self.info.run()
+        info.props.skip_pager_hint = False  # revert MessageDialog() default. seems useless
+        info.present_with_time(time.time())  # required to make sure it shows
+        self.info = info  # to prevent multiple dialogs on every do_info()
+        self.info.run()  # blocks until OK button or close window
         self.info.destroy()
         self.info = None
+
 
     def do_edit(self, _hdl=None):
         subprocess.check_call(['xdg-open', self.CONFIG])
@@ -212,7 +219,7 @@ class SSHReverseTunnelIndicator(object):
             about.visible = False  # Custom attribute
             self.about = about
         if self.about.visible:
-            self.about.present()
+            self.about.present_with_time(time.time())
             return
         #TODO: disable minimize
         self.about.visible = True
