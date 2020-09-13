@@ -243,14 +243,10 @@ class SSHReverseTunnelIndicator(object):
         self.about.hide()
         self.about.is_running = False
 
-    def do_quit(self, hdl=None):
-        # TODO: proper cleanup: .destroy() about and info even if not visible
-        if (not self.about or not self.about.visible) and not self.info:
-            Gtk.main_quit()
-        if self.info:
-            self.do_info(hdl)
-        if self.about and self.about.visible:
-            self.do_about(hdl)
+    def do_quit(self, _hdl=None):
+        if self.about: self.about.destroy()
+        if self.info:   self.info.destroy()
+        Gtk.main_quit()
 
 
     def find_command(self, command):
