@@ -183,6 +183,7 @@ class SSHReverseTunnelIndicator(object):
         def r(s):
             return s.replace(' -R', '\n-R').replace('-- ', '--\n')
 
+        # TODO: create only once, then just update info, like do_about()
         info = Gtk.MessageDialog(
             None,  # Parent Window
             Gtk.DialogFlags.MODAL,  # Flags
@@ -228,6 +229,7 @@ class SSHReverseTunnelIndicator(object):
         self.about.visible = False
 
     def do_quit(self, hdl=None):
+        # TODO: proper cleanup: .destroy() about and info even if not visible
         if (not self.about or not self.about.visible) and not self.info:
             Gtk.main_quit()
         if self.info:
