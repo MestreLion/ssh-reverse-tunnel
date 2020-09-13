@@ -1,49 +1,50 @@
 SSH Reverse Tunnel Icons
 ========================
 
-Icons for connection status were taken from [Gnome Disks](https://en.wikipedia.org/wiki/GNOME_Disks),
-files copied from [git repository commit `04efde39`](https://gitlab.gnome.org/GNOME/gnome-disk-utility/-/commit/04efde393f344af5148a90f08afd0fb9e48cfbda)
-before they were eventually [removed](https://gitlab.gnome.org/GNOME/gnome-disk-utility/-/commit/c0e28d1928b35b8fbaa964894399912493bfe67e)
-from the project in 2011.
+Icons for connection status based on [Gnome Icon Theme](https://download.gnome.org/sources/gnome-icon-theme),
+using `/src/media-record.svg` as a template file, copied from
+[Debian git repository commit `532e3019`](https://salsa.debian.org/gnome-team/gnome-icon-theme/-/commit/532e3019a19e16995e4e1087b49c4c38d4b4a7b6)
+before it was eventually [replaced](https://salsa.debian.org/gnome-team/gnome-icon-theme/-/commit/e69dde29fb4fe4beb17db5271fe5e3cb14a076f6)
+by `src/media-control-icons.svg` which aggregates all media control icons since 2010.
 
-- `ssh-reverse-tunnel-active.svg`  : `gdu-smart-healthy.svg`   (green)
-- `ssh-reverse-tunnel-connect.svg` : `gdu-smart-threshold.svg` (yellow)
-- `ssh-reverse-tunnel-error.svg`   : `gdu-smart-failing.svg`   (red)
-- `ssh-reverse-tunnel-inactive.svg`: `gdu-smart-unknown.svg`   (grey)
 
-https://gitlab.gnome.org/GNOME/gnome-disk-utility/-/commit/c0e28d1928b35b8fbaa964894399912493bfe67e
+That template file was extensively modified to rectify its elements alignment and
+also reduce both complexity and file size.
 
 Colors
 -------
-Original
+**HSV**
+H is 0, 90, 45 for Red, Geen, Yellow icons
+S,V for each gradient is:
+220,140
+221,106
+255, 82
+(except for Gray, which S=0)
+
+Red (original)
 #ef2929
 #c60e0e
 #a40000
 
-Red
-#a40000
-#ef2929
-#a40000
-
 Green:
-#00a413
-#28f040
+#0ec624
+#28ef40
 #00a413
 
 Yellow:
-#a49300
-#e9f028
-#a49300
+#e3ef29
+#bbc60e
+#9aa400
 
 Gray:
-#525252
 #8c8c8c
+#6a6a6a
 #525252
 
 
-New source
-----------
-from gnome-icon-theme project
+Tech Details
+-------------
+from gnome-icon-theme project (does not seem to have a website)
 https://salsa.debian.org/gnome-team/gnome-icon-theme
 
 https://download.gnome.org/sources/gnome-icon-theme/2.28/gnome-icon-theme-2.28.0.tar.bz2
@@ -71,8 +72,8 @@ Last Release:	a5d6b00da2edf22913305e9af337c4fe797eb11a	Mar 25 00:36:33 2014 -040
 Last Debian:	a739d8c3f2966d4d2c56c21117931a367a5cba06	Mar 17 22:47:26 2018 -0400	releasing package gnome-icon-theme version 3.12.0-3	Jeremy Bicha <jbicha@ubuntu.com>
 
 SVG minifyers:
+https://vecta.io/nano
 https://jakearchibald.github.io/svgomg/
 https://kraken.io/web-interface
 https://www.iloveimg.com/resize-image/resize-svg
 https://www.svgminify.com/
-https://vecta.io/nano
