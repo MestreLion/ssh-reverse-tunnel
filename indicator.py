@@ -220,6 +220,7 @@ class SSHReverseTunnelIndicator(object):
 
     def do_about(self, _hdl=None):
         if not self.about:
+            # TODO: disable minimize
             about = Gtk.AboutDialog()
             about.set_destroy_with_parent(True)
             about.set_program_name(__appname__)
@@ -232,16 +233,15 @@ class SSHReverseTunnelIndicator(object):
             about.set_authors([__author__])
             about.set_license_type(Gtk.License.GPL_3_0)
             about.set_copyright('Copyright (C) 2019 Rodrigo Silva')
-            about.visible = False  # Custom attribute
+            about.is_running = False  # Custom attribute
             self.about = about
-        if self.about.visible:
-            self.about.present_with_time(time.time())
+        self.about.present_with_time(time.time())
+        if self.about.is_running:
             return
-        #TODO: disable minimize
-        self.about.visible = True
+        self.about.is_running = True
         self.about.run()
         self.about.hide()
-        self.about.visible = False
+        self.about.is_running = False
 
     def do_quit(self, hdl=None):
         # TODO: proper cleanup: .destroy() about and info even if not visible
