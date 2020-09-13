@@ -73,6 +73,14 @@ class SSHReverseTunnelIndicator(object):
     # -------------------------------------------------------------------------
     # Initialization
 
+    @classmethod
+    def main(cls, argv=None):  # @UnusedVariable
+        """App entry point and indicator main loop. A wrapper to Gtk.main()."""
+        cls()
+        # Catching KeyboardInterrupt does not work well with Gtk.main()
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        Gtk.main()
+
     def __init__(self):
         self.ind = AppIndicator.Indicator.new(
             "indicator-sshreversetunnel",
@@ -289,14 +297,13 @@ class SSHReverseTunnelIndicator(object):
             print(icon)
 
 
-    # -------------------------------------------------------------------------
-    # Entry point
+# -----------------------------------------------------------------------------
+# Entry point
 
-    def main(self):
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        Gtk.main()
+def main(argv=None):
+    """Convenience wrapper to the real entry point"""
+    SSHReverseTunnelIndicator.main(argv)
 
 
 if __name__ == "__main__":
-    ind = SSHReverseTunnelIndicator()
-    ind.main()
+    sys.exit(main(sys.argv[1:]))
