@@ -53,10 +53,10 @@ __appdesc__ = 'App Indicator for creating reverse SSH tunnels'
 __author__  = 'Rodrigo Silva'
 __url__     = 'http://github.com/MestreLion/ssh-reverse-tunnel'
 
-PY3 = sys.version_info[0] >= 3
-
 
 class SSHReverseTunnelIndicator(object):
+    PY3 = sys.version_info[0] >= 3
+
     ICON_MAIN     = 'preferences-system-network'
     ICON_ACTIVE   = 'ssh-reverse-tunnel-active'
     ICON_INACTIVE = 'ssh-reverse-tunnel-inactive'
@@ -68,6 +68,10 @@ class SSHReverseTunnelIndicator(object):
         'ssh-reverse-tunnel.conf'
     )
     SETTINGS = 'com.rodrigosilva.ssh-reverse-tunnel'
+
+
+    # -------------------------------------------------------------------------
+    # Initialization
 
     def __init__(self):
         self.ind = AppIndicator.Indicator.new(
@@ -127,6 +131,9 @@ class SSHReverseTunnelIndicator(object):
         GLib.timeout_add_seconds(5, self.update_labels)
 
 
+    # -------------------------------------------------------------------------
+    # Actions - all the app logic
+
     def update_labels(self):
         pid = self.check_status()
         if pid:
@@ -163,7 +170,7 @@ class SSHReverseTunnelIndicator(object):
 
     def check_status(self, full=False):
         try:
-            kwargs = dict(universal_newlines=True) if PY3 else {}
+            kwargs = dict(universal_newlines=True) if self.PY3 else {}
             output = subprocess.check_output([self.command, '--status'], **kwargs)
             pid = self.get_pid(output)
         except subprocess.CalledProcessError:
@@ -171,6 +178,11 @@ class SSHReverseTunnelIndicator(object):
             pid = 0
         return output if full else pid
 
+
+    # -------------------------------------------------------------------------
+    # Event handlers
+    # do_*() functions are set as main menu "onclick" handlers
+    # avoid calling them directly, unless simulating an actual menu item click
 
     def do_connect(self, _hdl=None):
         self.set_connecting()
@@ -258,6 +270,9 @@ class SSHReverseTunnelIndicator(object):
         Gtk.main_quit()
 
 
+    # -------------------------------------------------------------------------
+    # Utility functions
+
     def find_command(self, command):
         for path in (
             os.path.join(__, command)
@@ -265,15 +280,17 @@ class SSHReverseTunnelIndicator(object):
         ):
                 if os.access(path, os.X_OK) and os.path.isfile(path):
                     return path
-
         # Fallback
         return osp.join(osp.dirname(osp.realpath(__file__)), command)
-
 
     # Unused, for reference only
     def list_icons(self):
         for icon in sorted(Gtk.IconTheme.get_default().list_icons(None)):
             print(icon)
+
+
+    # -------------------------------------------------------------------------
+    # Entry point
 
     def main(self):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
