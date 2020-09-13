@@ -40,7 +40,6 @@ gi.require_versions({
 })
 from gi.repository import (
     AppIndicator3 as AppIndicator,
-    Gio,  # for settings
     GLib,
     Gtk,
 )
@@ -63,11 +62,20 @@ class SSHReverseTunnelIndicator(object):
     ICON_CONNECT  = 'ssh-reverse-tunnel-connect'
     ICON_ERROR    = 'ssh-reverse-tunnel-error'
 
+    # For ssh-reverse-tunnel, not the indicator
     CONFIG = osp.join(
         osp.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config')),
         'ssh-reverse-tunnel.conf'
     )
-    SETTINGS = 'com.rodrigosilva.ssh-reverse-tunnel'
+
+    # For the indicator
+    APPID = 'com.rodrigosilva.ssh-reverse-tunnel'
+
+    # Factory default settings for indicator
+    SETTINGS = {
+        'connect-on-start':  True,
+        'update-interval':   5,
+    }
 
 
     # -------------------------------------------------------------------------
@@ -76,6 +84,7 @@ class SSHReverseTunnelIndicator(object):
     @classmethod
     def main(cls, argv=None):  # @UnusedVariable
         """App entry point and indicator main loop. A wrapper to Gtk.main()."""
+        # TODO: check if already running and exit, either silently or warning
         cls()
         # Catching KeyboardInterrupt does not work well with Gtk.main()
         signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -83,7 +92,7 @@ class SSHReverseTunnelIndicator(object):
 
     def __init__(self):
         self.ind = AppIndicator.Indicator.new(
-            "indicator-sshreversetunnel",
+            self.APPID,
             self.ICON_MAIN,
             AppIndicator.IndicatorCategory.APPLICATION_STATUS
         )
@@ -128,15 +137,18 @@ class SSHReverseTunnelIndicator(object):
         self.ind.set_menu(gtkmenu)
         self.info  = None
         self.about = None
-        self.settings = Gio.Settings#.new(self.SETTINGS)  # for auto-connect
+
+        # TODO: read from Gio.Settings.new(self.APPID)
+        self.settings = self.SETTINGS.copy()
 
         self.command = self.find_command('ssh-reverse-tunnel')
         self.update_labels()
 
-        if not self.check_status():
+        if self.settings['connect-on-start'] and not self.check_status():
             self.do_connect()
 
-        GLib.timeout_add_seconds(5, self.update_labels)
+        GLib.timeout_add_seconds(self.settings['update-interval'],
+                                 self.update_labels)
 
 
     # -------------------------------------------------------------------------
