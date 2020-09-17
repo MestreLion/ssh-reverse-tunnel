@@ -59,6 +59,8 @@ class Settings(object):
     # Example usage: settings['mybool'] => self._settings.get_boolean('mybool')
     def __init__(self, appid, datadir, default):
         self._default = default
+        #TODO: try a list of datadirs instead of a single one
+        # [ datadir, curdir/data, etc...]
         try:
             self._settings = Gio.Settings.new_full(
                 Gio.SettingsSchemaSource.new_from_directory(
