@@ -40,7 +40,7 @@ fi
 
 ssh_close() {
 	if [[ -e "$pidfile" ]]; then
-		kill "$(<"$pidfile")"
+		kill "$(<"$pidfile")" 2>/dev/null  # $pidfile might be leftover
 		rm -f -- "$pidfile"  # autossh deletes it if closed normally
 	fi
 }
