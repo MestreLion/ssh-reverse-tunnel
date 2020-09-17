@@ -40,17 +40,40 @@ gi.require_versions({
 })
 from gi.repository import (
     AppIndicator3 as AppIndicator,
+    Gio,
     GLib,
     Gtk,
 )
 
 
 __all__     = ['SSHReverseTunnelIndicator']
+__title__   = 'ssh-reverse-tunnel'
 __appname__ = 'SSH Reverse Tunnel Indicator'
 __version__ = '1.0'
 __appdesc__ = 'App Indicator for creating reverse SSH tunnels'
 __author__  = 'Rodrigo Silva'
 __url__     = 'http://github.com/MestreLion/ssh-reverse-tunnel'
+
+
+class Settings(object):
+    # Example usage: settings['mybool'] => self._settings.get_boolean('mybool')
+    def __init__(self, appid, datadir, default):
+        self._default = default
+        try:
+            self._settings = Gio.Settings.new_full(
+                Gio.SettingsSchemaSource.new_from_directory(
+                    datadir,
+                    Gio.SettingsSchemaSource.get_default(),
+                    False,
+                ).lookup(appid, False),
+                None,
+                None
+            )
+        except GLib.Error:
+            #TODO: print warning
+            self._settings = {}
+    def __getitem__(self, key):
+        return self._settings.get(key, self._default[key])
 
 
 class SSHReverseTunnelIndicator(object):
@@ -69,7 +92,7 @@ class SSHReverseTunnelIndicator(object):
     )
 
     # For the indicator
-    APPID = 'com.rodrigosilva.ssh-reverse-tunnel'
+    APPID = 'com.rodrigosilva.' + __title__
 
     # Factory default settings for indicator
     SETTINGS = {
@@ -77,6 +100,10 @@ class SSHReverseTunnelIndicator(object):
         'update-interval':   5,
     }
 
+    DATADIR = osp.join(
+        osp.expanduser(os.environ.get('XDG_DATA_HOME', '~/.local/share')),
+        __title__
+    )
 
     # -------------------------------------------------------------------------
     # Initialization
@@ -139,7 +166,7 @@ class SSHReverseTunnelIndicator(object):
         self.about = None
 
         # TODO: read from Gio.Settings.new(self.APPID)
-        self.settings = self.SETTINGS.copy()
+        self.settings = Settings(self.APPID, self.DATADIR, self.SETTINGS)
 
         self.command = self.find_command('ssh-reverse-tunnel')
         self.update_labels()
@@ -197,7 +224,6 @@ class SSHReverseTunnelIndicator(object):
             output = ''
             pid = 0
         return output if full else pid
-
 
     # -------------------------------------------------------------------------
     # Event handlers
