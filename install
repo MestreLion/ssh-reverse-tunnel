@@ -3,12 +3,13 @@
 set -Eeuo pipefail  # exit on any error
 trap '>&2 echo "error: line $LINENO, status $?: $BASH_COMMAND"' ERR
 
-myname="${0##*/}"
-mydir=$(dirname "$(readlink -f "$0")")
+here=$(dirname "$(readlink -f "$0")")
+xdg_config=${XDG_CONFIG_HOME:-$HOME/.config}
 
-exec=$mydir/ssh-reverse-tunnel
+slug=ssh-reverse-tunnel
+exec=$here/$slug
 indicator=${exec}-indicator
-autostart=${XDG_CONFIG_HOME:-$HOME/.config}/autostart
+autostart=$xdg_config/autostart
 desktop=${indicator}.desktop
 bindir=${XDG_BIN_HOME:-$HOME/.local/bin}
 bin=$bindir/${exec##*/}
@@ -37,12 +38,11 @@ mkdir --parents -- "$bindir"
 rm -f -- "$bin"    && ln -s -- "$exec"      "$bin"
 rm -f -- "$binind" && ln -s -- "$indicator" "$binind"
 
-
 # xdg-icon-resource does not support SVG, so...
-install -D --target-directory "$svgdir" -- "$mydir"/icons/*.svg
+install -D --target-directory "$svgdir" -- "$here"/icons/*.svg
 xdg-icon-resource forceupdate
 
-
+# shellcheck disable=SC2174
 mkdir --parents --mode 700 -- "$autostart"
 xdg-desktop-menu install --novendor "$desktop"
 cp -- "$desktop" "$autostart"

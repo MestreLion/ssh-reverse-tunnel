@@ -52,15 +52,15 @@ __appname__ = 'SSH Reverse Tunnel Indicator'
 __version__ = '1.0'
 __appdesc__ = 'App Indicator for creating reverse SSH tunnels'
 __author__  = 'Rodrigo Silva'
-__url__     = 'http://github.com/MestreLion/ssh-reverse-tunnel'
+__url__     = 'https://github.com/MestreLion/ssh-reverse-tunnel'
 
 
 class Settings(object):
     # Example usage: settings['mybool'] => self._settings.get_boolean('mybool')
     def __init__(self, appid, datadir, default):
         self._default = default
-        #TODO: try a list of datadirs instead of a single one
-        # [ datadir, curdir/data, etc...]
+        # TODO: try a list of datadirs instead of a single one
+        #  [ datadir, curdir/data, etc... ]
         try:
             self._settings = Gio.Settings.new_full(
                 Gio.SettingsSchemaSource.new_from_directory(
@@ -72,8 +72,9 @@ class Settings(object):
                 None
             )
         except GLib.Error:
-            #TODO: print warning
+            # TODO: print warning
             self._settings = {}
+
     def __getitem__(self, key):
         return self._settings.get(key, self._default[key])
 
@@ -110,8 +111,9 @@ class SSHReverseTunnelIndicator(object):
     # -------------------------------------------------------------------------
     # Initialization
 
+    # noinspection PyUnusedLocal
     @classmethod
-    def main(cls, argv=None):  # @UnusedVariable
+    def main(cls, argv=None):
         """App entry point and indicator main loop. A wrapper to Gtk.main()."""
         # TODO: check if already running and exit, either silently or warning
         cls()
@@ -120,6 +122,7 @@ class SSHReverseTunnelIndicator(object):
         Gtk.main()
 
     def __init__(self):
+        # noinspection PyArgumentList
         self.ind = AppIndicator.Indicator.new(
             self.APPID,
             self.ICON_MAIN,
@@ -132,7 +135,7 @@ class SSHReverseTunnelIndicator(object):
         self.menu = {}
         gtkmenu = Gtk.Menu()
 
-        def create_menu_item(item, gtkmenu):
+        def create_menu_item(item):
             if not item:
                 gtkmenu.append(Gtk.SeparatorMenuItem())
                 return
@@ -145,7 +148,7 @@ class SSHReverseTunnelIndicator(object):
             gtkmenu.append(itm)
             self.menu[item[0]] = itm
 
-        for item in [
+        for menu_item in [
             ['status',      ""],
             [],
             ['connect',     "_Connect"],
@@ -158,7 +161,7 @@ class SSHReverseTunnelIndicator(object):
             [],
             ['quit',        "_Quit"],
         ]:
-            create_menu_item(item, gtkmenu)
+            create_menu_item(menu_item)
         gtkmenu.show_all()
 
         self.menu['status'].set_sensitive(False)
@@ -171,6 +174,7 @@ class SSHReverseTunnelIndicator(object):
         self.settings = Settings(self.APPID, self.DATADIR, self.SETTINGS)
 
         self.command = self.find_command('ssh-reverse-tunnel')
+        self.active = False
         self.update_labels()
 
         if self.settings['connect-on-start'] and not self.check_status():
@@ -178,7 +182,6 @@ class SSHReverseTunnelIndicator(object):
 
         GLib.timeout_add_seconds(self.settings['update-interval'],
                                  self.update_labels)
-
 
     # -------------------------------------------------------------------------
     # Actions - all the app logic
@@ -202,7 +205,7 @@ class SSHReverseTunnelIndicator(object):
         self.menu['info'].set_sensitive(True)
         self.menu['connect'].set_sensitive(False)
         self.menu['disconnect'].set_sensitive(True)
-        #self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+        # self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
         self.ind.set_icon(self.ICON_ACTIVE)
 
     def set_inactive(self):
@@ -211,11 +214,8 @@ class SSHReverseTunnelIndicator(object):
         self.menu['info'].set_sensitive(False)
         self.menu['connect'].set_sensitive(True)
         self.menu['disconnect'].set_sensitive(False)
-        #self.ind.set_status(AppIndicator.IndicatorStatus.ATTENTION)
+        # self.ind.set_status(AppIndicator.IndicatorStatus.ATTENTION)
         self.ind.set_icon(self.ICON_INACTIVE)
-
-    def get_pid(self, output):
-        return int(''.join(output.strip().split(' ', 1)[0:1]))
 
     def check_status(self, full=False):
         try:
@@ -261,7 +261,7 @@ class SSHReverseTunnelIndicator(object):
                 "SSH Reverse Tunnel Connection Information"
             )
             # Revert MessageDialog() default. Seems useless, so disabled
-            #info.props.skip_pager_hint = False
+            # info.props.skip_pager_hint = False
             info.is_running = False  # Custom attribute
             self.info = info  # reuse this dialog on every do_info()
 
@@ -275,10 +275,9 @@ class SSHReverseTunnelIndicator(object):
 
         # Dialog is hidden, display again and block until OK button or close
         self.info.is_running = True
-        self.info.run()  # Blocks. Also prints Gtk warning about no parent
-        self.info.hide() # Don't .destroy(), just .hide() so it can be reused
+        self.info.run()   # Blocks. Also prints Gtk warning about no parent
+        self.info.hide()  # Don't .destroy(), just .hide() so it can be reused
         self.info.is_running = False
-
 
     def do_edit(self, _hdl=None):
         subprocess.check_call(['xdg-open', self.CONFIG])
@@ -317,22 +316,26 @@ class SSHReverseTunnelIndicator(object):
         if self.info:   self.info.destroy()
         Gtk.main_quit()
 
-
     # -------------------------------------------------------------------------
     # Utility functions
-
-    def find_command(self, command):
+    @staticmethod
+    def find_command(command):
         for path in (
             os.path.join(__, command)
             for __ in os.environ["PATH"].split(os.pathsep)
         ):
-                if os.access(path, os.X_OK) and os.path.isfile(path):
-                    return path
+            if os.access(path, os.X_OK) and os.path.isfile(path):
+                return path
         # Fallback
         return osp.join(osp.dirname(osp.realpath(__file__)), command)
 
+    @staticmethod
+    def get_pid(output):
+        return int(''.join(output.strip().split(' ', 1)[0:1]))
+
     # Unused, for reference only
-    def list_icons(self):
+    @staticmethod
+    def _list_icons():
         for icon in sorted(Gtk.IconTheme.get_default().list_icons(None)):
             print(icon)
 

@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. See <http://www.gnu.org/licenses/gpl.html>
 
-# Override settings in config file: ~/.config/ssh-reverse-tunnel.conf
+# Factory settings, overridden by config file: ~/.config/ssh-reverse-tunnel.conf
 ports=(22 80 443)
 hostopts=(user@example.com -p 2222)
 portoffset=10000
@@ -28,6 +28,7 @@ pidfile=$HOME/.ssh/ssh-reverse-tunnel.pid
 
 # Read config or create a default one
 if [[ -f "$config" ]]; then
+	# shellcheck source=ssh-reverse-tunnel.conf
 	source "$config"
 else
 	cat > "$config" <<-EOF
@@ -47,8 +48,8 @@ ssh_close() {
 
 ssh_status() {
 	if [[ -e "$pidfile" ]]; then
-		output=$(ps --no-headers "$(<"$pidfile")")
-		if (($? == 0)); then
+		local output
+		if output=$(ps --no-headers "$(<"$pidfile")"); then
 			echo "$output"
 			return
 		fi
@@ -86,7 +87,7 @@ fi
 # Map remote ports using the rule: remote port = local port + port offset
 map=()
 for port in "${ports[@]}"; do
-	rport=$(($port + $portoffset))
+	rport=$((port + portoffset))
 	map+=(-R "${rport}:localhost:${port}")
 done
 
