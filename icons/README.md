@@ -13,14 +13,21 @@ also reduce both complexity and file size.
 
 Colors
 -------
-**HSV**
-H is 0, 90, 45 for Red, Geen, Yellow icons
-S,V for each gradient is:
-220,140
-221,106
-255, 82
-(except for Gray, which S=0)
 
+**HSV**
+
+H is 0, 90, 45 for Red, Green, Yellow icons respectively.
+
+S, V for each gradient is:
+```
+220, 140
+221, 106
+255,  82
+```
+(except for Gray, where S=0)
+
+**RGB**
+```
 Red (original)
 #ef2929
 #c60e0e
@@ -40,16 +47,19 @@ Gray:
 #8c8c8c
 #6a6a6a
 #525252
-
+```
 
 Tech Details
 -------------
-from gnome-icon-theme project (does not seem to have a website)
+From gnome-icon-theme project (does not seem to have a website):
+
 https://salsa.debian.org/gnome-team/gnome-icon-theme
 
 https://download.gnome.org/sources/gnome-icon-theme/2.28/gnome-icon-theme-2.28.0.tar.bz2
+
 https://download.gnome.org/sources/gnome-icon-theme/3.12/gnome-icon-theme-3.12.0.tar.xz
 
+```
 scalable/actions/media-record.svg
 Single 48x48 SVG
 Created:	9f733f86e942d815bf2408128c0b5985e0d4f899	Aug 13 18:52:42 2007 +0000	new media actions icons and various touchups.	Lapo Calamandrei <lapo@src.gnome.org>
@@ -77,3 +87,4 @@ https://jakearchibald.github.io/svgomg/
 https://kraken.io/web-interface
 https://www.iloveimg.com/resize-image/resize-svg
 https://www.svgminify.com/
+```
