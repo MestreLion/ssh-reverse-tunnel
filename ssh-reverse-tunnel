@@ -22,7 +22,7 @@ ports=(22 80 443)
 hostopts=(user@example.com -p 2222)
 portoffset=10000
 
-config=${XDG_CONFIG_HOME:-$HOME/.config}/ssh-reverse-tunnel.conf
+config=${SSH_REVERSE_TUNNEL_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/ssh-reverse-tunnel.conf}
 keyfile=$HOME/.ssh/id_rsa.ssh-reverse-tunnel.nopassword
 pidfile=$HOME/.ssh/ssh-reverse-tunnel.pid
 
@@ -37,6 +37,8 @@ else
 		hostopts=(${hostopts[@]})
 		portoffset=$portoffset
 	EOF
+	echo "New config created, edit it and try again: $config" >&2
+	exit 1
 fi
 
 ssh_close() {

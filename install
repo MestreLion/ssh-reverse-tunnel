@@ -16,23 +16,24 @@ bin=$bindir/${exec##*/}
 binind=${bin}-indicator
 icondir=${XDG_DATA_HOME:-$HOME/.local/share}/icons
 svgdir=$icondir/hicolor/scalable/apps
+packages=(autossh gir1.2-appindicator3-0.1)
+config=${SSH_REVERSE_TUNNEL_CONFIG:-$xdg_config/$slug.conf}
 
-if ! type autossh >/dev/null 2>&1; then
-	sudo apt install -y -- autossh
-fi
-
-# sudo apt install gir1.2-appindicator3-0.1
-
-config=${SSH_REVERSE_TUNNEL_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/ssh-reverse-tunnel.conf}
-# Read config or create a default one
-if [[ ! -f "$config" ]]; then
-	cat > "$config" <<-EOF
-		# ssh-reverse-tunnel settings
-		ports=(${ports[@]})
-		hostopts=(${hostopts[@]})
-		portoffset=$portoffset
-	EOF
-fi
+install_packages() {
+	# Avoid marking packages as manual by only installing the missing ones
+	local pkg=
+	local pkgs=()
+	local ok
+	for pkg in "$@"; do
+		# shellcheck disable=SC1083
+		ok=$(dpkg-query --showformat=\${Version} --show "$pkg" 2>/dev/null || true)
+		if [[ -z "$ok" ]]; then pkgs+=( "$pkg" ); fi
+	done
+	if (("${#pkgs[@]}")); then
+		sudo apt install "${pkgs[@]}"
+	fi
+}
+install_packages "${packages[@]}"
 
 mkdir --parents -- "$bindir"
 rm -f -- "$bin"    && ln -s -- "$exec"      "$bin"
@@ -46,3 +47,9 @@ xdg-icon-resource forceupdate
 mkdir --parents --mode 700 -- "$autostart"
 xdg-desktop-menu install --novendor "$desktop"
 cp -- "$desktop" "$autostart"
+
+# First run to create config
+if ! [[ -f "$config" ]]; then
+	"$exec" --status >/dev/null || true
+	editor "$config"
+fi
