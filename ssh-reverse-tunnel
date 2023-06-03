@@ -21,6 +21,28 @@
 ports=(22 80 443)
 hostopts=(user@example.com -p 2222)
 portoffset=10000
+sshopts=(
+	# Time without data to check if server is alive. Default: 0, no check
+	-o ServerAliveInterval=10
+	# Attempts for above check to fail before disconnecting. Default: 3
+	-o ServerAliveCountMax=3
+	# Both combined means disconnect if server is unresponsive for 30 seconds
+
+	# Periodically send TCP KeepAlive messages. Default: already 'yes'
+	# Not directly related to the above options, might prevent server timeouts
+	-o TCPKeepAlive=yes
+
+	# Disconnect if ssh cannot set up port forwarding. Default: 'no'
+	-o ExitOnForwardFailure=yes
+
+	# Do not ask confirmation for new hosts and accept changed host keys
+	# Default: 'ask', confirmation required for new and reject changed keys
+	-o StrictHostKeyChecking=no
+
+	# File to save host keys, hereby discarded so all hosts are considered new
+	# Default: '~/.ssh/known_hosts'
+	-o UserKnownHostsFile=/dev/null
+)
 
 config=${SSH_REVERSE_TUNNEL_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/ssh-reverse-tunnel.conf}
 keyfile=$HOME/.ssh/id_rsa.ssh-reverse-tunnel.nopassword
@@ -36,6 +58,7 @@ else
 		ports=(${ports[@]})
 		hostopts=(${hostopts[@]})
 		portoffset=$portoffset
+		sshopts=(${sshopts[@]})
 	EOF
 	echo "New config created, edit it and try again: $config" >&2
 	exit 1
@@ -48,6 +71,9 @@ ssh_close() {
 	fi
 }
 
+# FIXME: This only checks if autossh is running, NOT if ssh is actually connected!
+# As such this also return success even if ssh failed to connect, as autossh
+# will simply re-start ssh. This seems to be an autossh limitation when using -f
 ssh_status() {
 	if [[ -e "$pidfile" ]]; then
 		local output
@@ -98,7 +124,7 @@ ssh_close
 
 # Create the reverse SSH tunnels
 export AUTOSSH_PIDFILE=$pidfile
-export AUTOSSH_PORT=$portoffset
-export SSH_AUTH_SOCK=0
+export SSH_AUTH_SOCK=0  # disable ssh-agent
 
-autossh -f -- -N -T "${keyargs[@]}" "${hostopts[@]}" "${map[@]}"
+autossh -f -M "$portoffset" -- \
+	-NT "${sshopts[@]}" "${keyargs[@]}" "${hostopts[@]}" "${map[@]}"
