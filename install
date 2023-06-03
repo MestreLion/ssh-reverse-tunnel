@@ -44,7 +44,8 @@ install -D --target-directory "$svgdir" -- "$here"/icons/*.svg
 xdg-icon-resource forceupdate
 
 # shellcheck disable=SC2174
-mkdir --parents --mode 700 -- "$autostart"
+mkdir --parents --mode 700 -- "$xdg_config"
+mkdir --parents -- "$autostart"
 xdg-desktop-menu install --novendor "$desktop"
 cp -- "$desktop" "$autostart"
 
