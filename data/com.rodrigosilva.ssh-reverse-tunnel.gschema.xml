@@ -18,7 +18,7 @@
 		If disabled, indicator will only reflect ssh-reverse-tunnel current status.
 		This is similar to 'connect-on-start', but instead of only trying to connect once at
 		indicator start, this keep reconnecting whenever it disconnects.
-		Notice that if enabled this will nulify manual disconnects perfomed by the user,
+		Notice that if enabled this will nullify manual disconnects performed by the user,
 		as the indicator will re-connect on the next update.
 		</description>
 	</key>
@@ -28,9 +28,9 @@
 		<summary>How often, in seconds, to check connection status.</summary>
 		<description>
 		On every check, indicator runs `ssh-reverse-tunnel --status` and update its
-		labels, menus and icons accordinly. This interval is possibly only set at indicator
+		labels, menus and icons accordingly. This interval is possibly only set at indicator
 		start, so restarting the indicator might be necessary for changes to apply.
-		This also affects the how often 'auto-reconnect' tries to re-connect, if that
+		This also affects how often 'auto-reconnect' tries to re-connect, if that
 		is enabled.
 		</description>
 	</key>
