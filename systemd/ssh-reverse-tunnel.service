@@ -1,0 +1,65 @@
+# SSH Reverse Tunnel systemd service file
+# https://github.com/MestreLion/ssh-reverse-tunnel
+#
+# System-wide: /etc/systemd/system/ssh-reverse-tunnel.service
+#	ssh key: /etc/ssh-reverse-tunnel/id_ed25519{,.pub}
+# Per-user: ~/.local/share/systemd/user/ssh-reverse-tunnel.service
+#	ssh key: ~/.ssh/id_ed25519.ssh-reverse-tunnel{,.pub}
+#
+# SSH options used:
+#
+# -T (RequestTTY=no ?)
+# Disable TTY allocation. Options: yes, no (-T), force (-t), auto (default?)
+#
+# -N
+# Do not execute a remote command (and most importantly, do not start the shell)
+#
+# -n
+# Effectively disable stdin by redirecting from /def/null
+#
+# ServerAliveInterval=20
+# Time without data to check if server is alive. Default: 0, no check.
+#
+# ServerAliveCountMax=3
+# Attempts for above check to fail before disconnecting. Default: already 3.
+# Both combined means disconnect if server is unresponsive for 3*20=60 seconds.
+#
+# TCPKeepAlive=yes
+# Periodically send TCP KeepAlive messages. Default: already 'yes'.
+# Not related to the above options other than preventing server-side disconnects.
+#
+# ExitOnForwardFailure=yes
+# Disconnect and exit if ssh cannot set up port forwarding.
+# Default: 'no', keeps the (useless) connection active.
+#
+# StrictHostKeyChecking=no
+# Do not ask confirmation for new hosts and accept changed host keys.
+# Default: 'ask', confirmation required for new hosts and reject changed keys.
+#
+# UserKnownHostsFile=/dev/null
+# File to save host keys, discarded to /dev/null so all hosts are considered new
+# Default: '~/.ssh/known_hosts'
+
+[Unit]
+Description=SSH Reverse Tunnel
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ssh -TNn                    \
+	-o ServerAliveInterval=20              \
+	-o ServerAliveCountMax=3               \
+	-o TCPKeepAlive=yes                    \
+	-o ExitOnForwardFailure=yes            \
+	-o StrictHostKeyChecking=no            \
+	-o UserKnownHostsFile=/dev/null        \
+	-i /etc/ssh-reverse-tunnel/id_ed25519  \
+	-R *:22222:localhost:22                \
+	ssh-reverse-tunnel@example.com -p 1234
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
