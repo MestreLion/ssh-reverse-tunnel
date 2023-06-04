@@ -39,7 +39,6 @@ user_exists() { getent passwd -- "${1:-}" >/dev/null; }
 #------------------------------------------------------------------------------
 
 if [[ -z "$key" ]]; then
-	exec &2
 	echo "Sets up a server for SSH Reverse Tunnel" >&2
 	echo "Usage: ${0##*/} SSH_PUBLIC_KEY_CONTENT" \
 		"[USERNAME [HOME_PREFIX [CONTACT_INFO]]]" >&2
@@ -51,12 +50,12 @@ if ! user_exists "$user"; then sudo adduser "${useropts[@]}" -- "$user"; fi
 home=$(user_home "$user")  # might be different than specified if already existed
 sudo -u "$user" mkdir -pm 0700 -- "${file%/*}"
 if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
-	sudo -u "$user" tee -a -- "$file" <<< "$key"
+	sudo -u "$user" tee -a >/dev/null -- "$file" <<< "$key"
 fi
 sudo -u "$user" chmod 0600 -- "$file"
 
 # Tune sshd for reverse tunnels
-sudo tee /etc/ssh/sshd_config.d/00-ssh-reverse-tunnel.conf >/dev/null <<EOF
+sudo tee -- /etc/ssh/sshd_config.d/00-ssh-reverse-tunnel.conf >/dev/null <<EOF
 # SSH Reverse Tunnel server settings
 # https://github.com/MestreLion/ssh-reverse-tunnel
 #
