@@ -127,4 +127,4 @@ export AUTOSSH_PIDFILE=$pidfile
 export SSH_AUTH_SOCK=0  # disable ssh-agent
 
 autossh -f -M "$portoffset" -- \
-	-NT "${sshopts[@]}" "${keyargs[@]}" "${hostopts[@]}" "${map[@]}"
+	-TNn "${sshopts[@]}" "${keyargs[@]}" "${hostopts[@]}" "${map[@]}"
