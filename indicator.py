@@ -19,7 +19,7 @@
 
 # References for PyGobject API, gi modules and AppIndicator:
 # https://lazka.github.io/pgi-docs/
-# https://developer.gnome.org/pygobject/stable/
+# https://pygobject.readthedocs.io/en/latest/guide/api/index.html
 # https://readthedocs.org/docs/python-gtk-3-tutorial/en/latest/index.html
 # https://wiki.ubuntu.com/DesktopExperienceTeam/ApplicationIndicators
 # https://github.com/canonical-web-and-design/older-apis
@@ -33,18 +33,17 @@ import time
 
 import gi
 gi.require_versions({
-    'AppIndicator3': '0.1',
+    'AyatanaAppIndicator3': '0.1',
     'Gio': '2.0',
     'GLib': '2.0',
     'Gtk': '3.0',
 })
 from gi.repository import (
-    AppIndicator3 as AppIndicator,
+    AyatanaAppIndicator3 as AppIndicator,
     Gio,
     GLib,
     Gtk,
 )
-
 
 __all__     = ['SSHReverseTunnelIndicator']
 __title__   = 'ssh-reverse-tunnel'

@@ -16,8 +16,11 @@ bin=$bindir/${exec##*/}
 binind=${bin}-indicator
 icondir=${XDG_DATA_HOME:-$HOME/.local/share}/icons
 svgdir=$icondir/hicolor/scalable/apps
-packages=(autossh gir1.2-appindicator3-0.1)
 config=${SSH_REVERSE_TUNNEL_CONFIG:-$xdg_config/$slug.conf}
+packages=(
+	autossh
+	gir1.2-ayatanaappindicator3-0.1
+)
 
 install_packages() {
 	# Avoid marking packages as manual by only installing the missing ones
