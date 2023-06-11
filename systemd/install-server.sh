@@ -69,7 +69,7 @@ sudo tee -- /etc/ssh/sshd_config.d/00-ssh-reverse-tunnel.conf >/dev/null <<EOF
 
 Match User ${user}
 	# Configurable and not bound to be the default ~/.ssh/authorized_keys
-	AuthorizedKeysFile     ~$(escape "${file#$home}")
+	AuthorizedKeysFile     $(escape "${file#$home/}")
 
 	# Disconnect if client is unresponsive for 3 * 15 = 45 seconds.
 	# Time without data to check if client is alive. Default: 0, no check.
