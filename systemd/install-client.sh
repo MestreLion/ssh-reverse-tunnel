@@ -10,7 +10,7 @@ set -Eeuo pipefail  # exit on any error
 trap '>&2 echo "error: line $LINENO, status $?: $BASH_COMMAND"' ERR
 #------------------------------------------------------------------------------
 
-host=${1:-}; shift
+host=${1:-}; shift || true
 tunnels=( "$@" )
 
 slug=ssh-reverse-tunnel
@@ -31,8 +31,10 @@ if [[ -z "$host" ]]; then
 fi
 
 if is_root; then
-	service_dir=/etc/systemd/system
 	prefix=/etc
+	service_dir=/etc/systemd/system
+	systemd_user=()
+
 else
 	xdg_config=${XDG_CONFIG_HOME:-$HOME/.config}
 	xdg_data=${XDG_DATA_HOME:-$HOME/.local/share}
@@ -40,6 +42,7 @@ else
 	mkdir --parents --mode 0700 -- "$xdg_config" "$xdg_data"
 	prefix=$xdg_config
 	service_dir=$xdg_data/systemd/user
+	systemd_user=( --user )
 	unset xdg_config xdg_data
 fi
 
@@ -50,17 +53,20 @@ key_file=$base_dir/id_$key_type
 comment=$slug@$(hostname --fqdn)
 
 # Create the tree
-mkdir -parents -- "$base_dir" "$service_dir"
+mkdir --parents -- "$base_dir" "$service_dir"
 
 # Generate SSH keys
 if ! [[ -f "$key_file" ]]; then
-	ssh-keygen -a 100 -t ed25519 -f "$key_file" -C "$comment"
+	ssh-keygen -a 100 -t ed25519 -f "$key_file" -N "" -C "$comment"
 fi
 
 # create systemd service
 if [[ -f "$service_file" ]]; then exit; fi
+printf -v tunnel_str -- '-R %s  ' "${tunnels[@]}"
+awk -v tunnels="$tunnel_str" -v host="$host" -- '
+	/:22222:localhost:22/ {print "\t" tunnels "\\"; next}
+	/@example.com/        {print "\t" host;         next}
+	{print}
+	' "$here"/ssh-reverse-tunnel.service > "$service_file"
 
-tunnel_str=$(printf '-R %s  \\\n\t' "${tunnels[@]}")
-awk -F'\t' -v tunnels="$tunnel_str" -v host="$host" -- \
-	'/localhost/{sub(tunnels)}/example/{sub(host)' \
-	"$here"/ssh-reverse-tunnel.service > "$service_file"
+systemctl "${systemd_user[@]}" enable --now "${service_file##*/}"
