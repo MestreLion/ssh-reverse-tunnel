@@ -30,7 +30,7 @@ useropts=(
 	--system  # implies --shell /usr/sbin/nologin
 	--group   # create its group, otherwise system users are put in nogroup
 	--quiet   # no error if system user already exists
-	--home "$home"  # default /home/<USER> even for system users
+	--home "$home"  # default is /home/<USER> even for system users
 	--gecos "SSH Reverse Tunnel service account,,,,$contact"
 )
 #------------------------------------------------------------------------------
@@ -48,11 +48,10 @@ fi
 # Create and setup up user
 if ! user_exists "$user"; then sudo adduser "${useropts[@]}" -- "$user"; fi
 home=$(user_home "$user")  # might be different than specified if already existed
-sudo -u "$user" mkdir -pm 0700 -- "${file%/*}"
+sudo -u "$user" mkdir -p -- "${file%/*}"
 if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
 	sudo -u "$user" tee -a >/dev/null -- "$file" <<< "$key"
 fi
-sudo -u "$user" chmod 0600 -- "$file"
 
 # Tune sshd for reverse tunnels
 sudo tee -- /etc/ssh/sshd_config.d/00-ssh-reverse-tunnel.conf >/dev/null <<EOF
@@ -67,9 +66,9 @@ sudo tee -- /etc/ssh/sshd_config.d/00-ssh-reverse-tunnel.conf >/dev/null <<EOF
 # - Improve tunnels' capabilities, allowing to bind ports to external interfaces
 
 Match User ${user}
-	# Disconnect if client is unresponsive for 3 * 20 = 60 seconds.
+	# Disconnect if client is unresponsive for 3 * 15 = 45 seconds.
 	# Time without data to check if client is alive. Default: 0, no check.
-	ClientAliveInterval    20
+	ClientAliveInterval    15
 	# Attempts for above check to fail before disconnecting. Default: already 3.
 	ClientAliveCountMax     3
 
