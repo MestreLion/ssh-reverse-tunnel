@@ -17,7 +17,7 @@ key=${1:-}
 user=${2:-ssh-reverse-tunnel}
 
 # Service account home prefix (its $HOME parent directory)
-prefix=${3-/var/lib}
+prefix=${3-/etc}
 
 # Contact info (no commas or semi-colons)
 contact=${4:-github.com/MestreLion/ssh-reverse-tunnel}
@@ -25,7 +25,7 @@ contact=${contact//:/}; contact=${contact//,/};
 
 #------------------------------------------------------------------------------
 home=$prefix/$user
-file=$home/.ssh/authorized_keys
+file=$home/authorized_keys
 useropts=(
 	--system  # implies --shell /usr/sbin/nologin
 	--group   # create its group, otherwise system users are put in nogroup
@@ -36,6 +36,7 @@ useropts=(
 #------------------------------------------------------------------------------
 user_home()   { getent passwd -- "${1:-$USER}" | cut -d: -f6; }
 user_exists() { getent passwd -- "${1:-}" >/dev/null; }
+escape()      { printf '%q' "$1"; }
 #------------------------------------------------------------------------------
 
 if [[ -z "$key" ]]; then
@@ -59,6 +60,7 @@ sudo tee -- /etc/ssh/sshd_config.d/00-ssh-reverse-tunnel.conf >/dev/null <<EOF
 # https://github.com/MestreLion/ssh-reverse-tunnel
 #
 # All settings are optional, and limited to the ${user} service account:
+# - Change default authorized_keys path
 # - Improve stability by disconnecting unresponsive clients to free used ports,
 #    so clients can re-connect and re-create the tunnels.
 # - Improve security by further restricting client permissions, as the connection
@@ -66,6 +68,9 @@ sudo tee -- /etc/ssh/sshd_config.d/00-ssh-reverse-tunnel.conf >/dev/null <<EOF
 # - Improve tunnels' capabilities, allowing to bind ports to external interfaces
 
 Match User ${user}
+	# Configurable and not bound to be the default ~/.ssh/authorized_keys
+	AuthorizedKeysFile     $(escape ~"${file#$home}")
+
 	# Disconnect if client is unresponsive for 3 * 15 = 45 seconds.
 	# Time without data to check if client is alive. Default: 0, no check.
 	ClientAliveInterval    15
