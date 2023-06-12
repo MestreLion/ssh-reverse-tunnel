@@ -1,20 +1,21 @@
-# SSH Reverse Tunnel using AutoSSH systemd service template file
+# SSH Reverse Tunnel using AutoSSH systemd service template
+# Save to /etc/systemd/system or ~/.local/share/systemd/user
 # https://github.com/MestreLion/ssh-reverse-tunnel
-#
-# SSH options:
-# -N: Do not execute a remote command (and most importantly, do not start the shell)
-# -n: Effectively disable stdin by redirecting from /def/null
-# -F: Custom config path instead of ~/.ssh/config, also ignoring /etc/ssh/ssh_config
+
 [Unit]
 Description=SSH Reverse Tunnel using AutoSSH (%I)
+Documentation=https://github.com/MestreLion/ssh-reverse-tunnel
 Wants=network-online.target
 After=network-online.target
 StartLimitIntervalSec=0
 
 [Service]
-Type=simple
-ExecStart=/usr/bin/autossh -M 30000 --  \
-	-Nn -F %E/ssh-reverse-tunnel/autossh-%i.conf -- autossh.%i
+# SSH options:
+# -N: Do not execute a remote command (and most importantly, do not start the shell)
+# -n: Effectively disable stdin by redirecting from /dev/null
+# -F: Custom config path instead of ~/.ssh/config, also ignoring /etc/ssh/ssh_config
+# Intentionally not using -M, let (Debian's) autossh choose free ports automatically
+ExecStart=/usr/bin/autossh -- -Nn -F %E/ssh-reverse-tunnel/%i.conf -- autossh.%i
 Restart=always
 RestartSec=60
 
