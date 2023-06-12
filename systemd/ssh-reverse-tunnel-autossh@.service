@@ -1,4 +1,4 @@
-# SSH Reverse Tunnel systemd service template file
+# SSH Reverse Tunnel using AutoSSH systemd service template file
 # https://github.com/MestreLion/ssh-reverse-tunnel
 #
 # SSH options:
@@ -6,14 +6,15 @@
 # -n: Effectively disable stdin by redirecting from /def/null
 # -F: Custom config path instead of ~/.ssh/config, also ignoring /etc/ssh/ssh_config
 [Unit]
-Description=SSH Reverse Tunnel (%I)
+Description=SSH Reverse Tunnel using AutoSSH (%I)
 Wants=network-online.target
 After=network-online.target
 StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/ssh -Nn -F %E/ssh-reverse-tunnel/%i.conf -- tunnels.%i
+ExecStart=/usr/bin/autossh -M 30000 --  \
+	-Nn -F %E/ssh-reverse-tunnel/autossh-%i.conf -- autossh.%i
 Restart=always
 RestartSec=60
 
