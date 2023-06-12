@@ -1,0 +1,21 @@
+# SSH Reverse Tunnel systemd service template file
+# https://github.com/MestreLion/ssh-reverse-tunnel
+#
+# SSH options:
+# -N: Do not execute a remote command (and most importantly, do not start the shell)
+# -n: Effectively disable stdin by redirecting from /def/null
+# -F: Custom config path instead of ~/.ssh/config, also ignoring /etc/ssh/ssh_config
+[Unit]
+Description=SSH Reverse Tunnel (%I)
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ssh -Nn -F %E/ssh-reverse-tunnel/%i.conf -- %i
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
