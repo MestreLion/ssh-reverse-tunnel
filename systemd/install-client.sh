@@ -22,7 +22,7 @@ user_home()   { getent passwd -- "${1:-$USER}" | cut -d: -f6; }
 user_exists() { getent passwd -- "${1:-}" >/dev/null; }
 is_root()     { (( EUID == 0 )); }
 bold()        { tput bold; printf '%s' "$@"; tput sgr0; }
-green()       { tput setaf 2; bold "$@"; }
+green()       { tput setaf 2; bold "$@"; printf; }
 exists()      { type "$@" >/dev/null 2>&1; }
 argerr()      { printf "%s: %s\n" "$self" "${1:-error}" >&2; usage 1; }
 invalid()     { argerr "invalid ${2:-option}: ${1:-}"; }
