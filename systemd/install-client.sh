@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# install-server - SSH Reverse Tunnel server installer
+# install-client.sh - SSH Reverse Tunnel client installer
 #
 # This file is part of <https://github.com/MestreLion/ssh-reverse-tunnel>
 # Copyright (C) 2023 Rodrigo Silva (MestreLion) <linux@rodrigosilva.com>
@@ -10,31 +10,46 @@ set -Eeuo pipefail  # exit on any error
 trap '>&2 echo "error: line $LINENO, status $?: $BASH_COMMAND"' ERR
 #------------------------------------------------------------------------------
 
-host=${1:-}; shift || true
-tunnels=( "$@" )
+aliases=()
+autossh=
 
 slug=ssh-reverse-tunnel
+self=${0##*/}
 here=$(dirname "$(readlink -f "$0")")
 
 #------------------------------------------------------------------------------
 user_home()   { getent passwd -- "${1:-$USER}" | cut -d: -f6; }
 user_exists() { getent passwd -- "${1:-}" >/dev/null; }
 is_root()     { (( EUID == 0 )); }
+escape()      { printf '%q' "$1"; }
+argerr()      { printf "%s: %s\n" "$self" "${1:-error}" >&2; usage 1; }
+invalid()     { argerr "invalid ${2:-option}: ${1:-}"; }
+usage()       {
+	exec >&2
+	echo "Sets up a client to establish SSH Reverse Tunnels with servers"
+	echo "Usage: ${0##*/} [-a|--autossh] [SERVER_ALIAS(es)...]"
+	echo "Example: ${0##*/} server vps proxy"
+	exit "${1:-0}"
+}
 #------------------------------------------------------------------------------
 
-if [[ -z "$host" ]]; then
-	echo "Sets up a client for SSH Reverse Tunnel" >&2
-	echo "Usage: ${0##*/} SSH_HOST [SSH_TUNNEL(s)...]" >&2
-	echo "Example: ${0##*/} '$slug@example.com -p 1234'" \
-		"'*:22222:localhost:22' '*:33333:localhost:33'"
-	exit 1
-fi
+for arg in "$@"; do [[ "$arg" == "-h" || "$arg" == "--help" ]] && usage ; done
+while (($#)); do
+	# shellcheck disable=SC2221,SC2222
+	case "$1" in
+	-a|--autossh) autossh='-autossh';;
+	--) shift; break;;
+	-*) invalid "$1";;
+	 *) aliases+=( "$1" );;
+	esac
+	shift || break
+done
+aliases+=( "$@" )
 
 if is_root; then
 	prefix=/etc
 	service_dir=/etc/systemd/system
-	systemd_user=()
-
+	systemctl_mode=(--system)
 else
 	xdg_config=${XDG_CONFIG_HOME:-$HOME/.config}
 	xdg_data=${XDG_DATA_HOME:-$HOME/.local/share}
@@ -42,15 +57,15 @@ else
 	mkdir --parents --mode 0700 -- "$xdg_config" "$xdg_data"
 	prefix=$xdg_config
 	service_dir=$xdg_data/systemd/user
-	systemd_user=( --user )
+	systemctl_mode=(--user)
 	unset xdg_config xdg_data
 fi
 
 base_dir=$prefix/$slug
-service_file=$service_dir/$slug.service
 key_type=ed25519
 key_file=$base_dir/id_$key_type
 comment=$slug@$(hostname --fqdn)
+service=${slug}${autossh}
 
 # Create the tree
 mkdir --parents -- "$base_dir" "$service_dir"
@@ -60,13 +75,25 @@ if ! [[ -f "$key_file" ]]; then
 	ssh-keygen -a 100 -t ed25519 -f "$key_file" -N "" -C "$comment"
 fi
 
-# create systemd service
-if [[ -f "$service_file" ]]; then exit; fi
-printf -v tunnel_str -- '-R %s  ' "${tunnels[@]}"
-awk -v tunnels="$tunnel_str" -v host="$host" -- '
-	/:22222:localhost:22/ {print "\t" tunnels "\\"; next}
-	/@example.com/        {print "\t" host;         next}
-	{print}
-	' "$here"/ssh-reverse-tunnel.service > "$service_file"
+# create *.conf files
+cp -- "$here"/*.conf "$base_dir"
 
-systemctl "${systemd_user[@]}" enable --now "${service_file##*/}"
+# create systemd service
+cp -- "$here"/"$service"@.service "$service_dir"
+
+for alias in "${aliases[@]}"; do
+	cp -- "$here"/_template.conf "$base_dir"/"$alias".conf
+	nano -- "$base_dir"/"$alias".conf
+	systemctl "${systemctl_mode[@]}" enable "$service@$alias"
+done
+
+if ((${#aliases[@]})); then
+	echo "For each server (${aliases[*]}), connect as a sudoer or root and run:"
+	echo "git clone https://github.com/MestreLion/ssh-reverse-tunnel"
+	echo "ssh-reverse-tunnel/systemd/install-server.sh '$(<"$key_file".pub)'"
+	echo
+	echo "When you exit the SSH session you may start the services:"
+	for alias in "${aliases[@]}"; do
+		echo systemctl "${systemctl_mode[@]}" start "$service@$alias"
+	done
+fi
