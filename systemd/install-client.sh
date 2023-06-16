@@ -21,7 +21,9 @@ here=$(dirname "$(readlink -f "$0")")
 user_home()   { getent passwd -- "${1:-$USER}" | cut -d: -f6; }
 user_exists() { getent passwd -- "${1:-}" >/dev/null; }
 is_root()     { (( EUID == 0 )); }
-escape()      { printf '%q' "$1"; }
+bold()        { tput bold; printf '%s' "$@"; tput sgr0; }
+green()       { tput setaf 2; bold "$@"; }
+exists()      { type "$@" >/dev/null 2>&1; }
 argerr()      { printf "%s: %s\n" "$self" "${1:-error}" >&2; usage 1; }
 invalid()     { argerr "invalid ${2:-option}: ${1:-}"; }
 usage()       {
@@ -67,6 +69,11 @@ key_file=$base_dir/id_$key_type
 comment=$slug@$(hostname --fqdn)
 service=${slug}${autossh}
 
+# install autossh if needed
+if [[ "$autossh" ]] && ! exists autossh; then
+	sudo apt install autossh
+fi
+
 # Create the tree
 mkdir --parents -- "$base_dir" "$service_dir"
 
@@ -82,18 +89,20 @@ cp -- "$here"/*.conf "$base_dir"
 cp -- "$here"/"$service"@.service "$service_dir"
 
 for alias in "${aliases[@]}"; do
-	cp -- "$here"/_template.conf "$base_dir"/"$alias".conf
+	cp --no-clobber -- "$here"/_template.conf "$base_dir"/"$alias".conf
 	nano -- "$base_dir"/"$alias".conf
 	systemctl "${systemctl_mode[@]}" enable "$service@$alias"
 done
 
 if ((${#aliases[@]})); then
-	echo "For each server (${aliases[*]}), connect as a sudoer or root and run:"
+	echo
+	green "For each server (${aliases[*]}), connect as root (or a sudoer) and run:"
 	echo "git clone https://github.com/MestreLion/ssh-reverse-tunnel"
 	echo "ssh-reverse-tunnel/systemd/install-server.sh '$(<"$key_file".pub)'"
 	echo
-	echo "When you exit the SSH session you may start the services:"
-	for alias in "${aliases[@]}"; do
-		echo systemctl "${systemctl_mode[@]}" start "$service@$alias"
-	done
+	green "When you exit the SSH session you may start the services:"
+	(
+		IFS=,
+		echo systemctl "${systemctl_mode[@]}" start "$service@{${aliases[*]}}"
+	)
 fi
