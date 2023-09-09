@@ -22,7 +22,7 @@ user_home()   { getent passwd -- "${1:-$USER}" | cut -d: -f6; }
 user_exists() { getent passwd -- "${1:-}" >/dev/null; }
 is_root()     { (( EUID == 0 )); }
 bold()        { tput bold; printf '%s' "$@"; tput sgr0; }
-green()       { tput setaf 2; bold "$@"; printf; }
+green()       { tput setaf 2; bold "$@"; printf '\n'; }
 exists()      { type "$@" >/dev/null 2>&1; }
 argerr()      { printf "%s: %s\n" "$self" "${1:-error}" >&2; usage 1; }
 invalid()     { argerr "invalid ${2:-option}: ${1:-}"; }
@@ -100,7 +100,7 @@ if ((${#aliases[@]})); then
 	echo "git clone https://github.com/MestreLion/ssh-reverse-tunnel"
 	echo "ssh-reverse-tunnel/systemd/install-server.sh '$(<"$key_file".pub)'"
 	echo
-	green "When you exit the SSH session you may start the services:"
+	green "When you exit the SSH session you may start the services (already enabled):"
 	(
 		IFS=,
 		echo systemctl "${systemctl_mode[@]}" start "$service@{${aliases[*]}}"
