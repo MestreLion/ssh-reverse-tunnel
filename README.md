@@ -1,6 +1,18 @@
-SSH Reverse Tunnel and Indicator
+SSH Reverse Tunnel and SOCKS Proxy Tools
 ===============================================================================
 
+Tools for creating and managing SSH reverse tunnels and SOCKS proxies
+
+- Modern [SSH Reverse Tunnel](systemd/) using `systemd`.
+- [SOCKS5 Proxy](ssh-socks-proxy/) tools.
+
+For the old outdated wrapper to `autossh`, read on.
+But this is most likely **NOT** what you want!
+
+---
+
+Old wrapper using Autossh and Desktop Indicator
+===============================================================================
 ## A wrapper to `autossh` with a handy desktop indicator
 
 ![About Window](screenshots/about.png)
