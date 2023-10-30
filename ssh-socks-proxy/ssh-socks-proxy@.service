@@ -1,6 +1,7 @@
 # SSH SOCKS5 Proxy systemd service template
-# Save to /etc/systemd/system or ~/.local/share/systemd/user
-# https://github.com/MestreLion/ssh-reverse-tunnel
+# Save to /etc/systemd/system, ~/.config/systemd/user or ~/.local/share/systemd/user
+# See https://github.com/MestreLion/ssh-reverse-tunnel
+# For on-demand socket activation, see https://unix.stackexchange.com/q/383678/4919
 
 [Unit]
 Description=SSH SOCKS5 Proxy (%I)
@@ -11,10 +12,13 @@ StartLimitIntervalSec=0
 
 [Service]
 # SSH options:
+# -a: Disable authentication agent connection forwarding
+# -k: Disable GSSAPI credentials forwarding (delegation)
+# -x: Disable X11 forwarding
 # -N: Do not execute a remote command (and most importantly, do not start the shell)
 # -n: Effectively disable stdin by redirecting from /dev/null
 # -F: Custom config path instead of ~/.ssh/config, also ignoring /etc/ssh/ssh_config
-ExecStart=/usr/bin/ssh -Nn -F %E/ssh-socks-proxy/%i.conf -- %i
+ExecStart=/usr/bin/ssh -kaxNn -F %E/%p/%p.conf -- %i
 Restart=always
 RestartSec=60
 
