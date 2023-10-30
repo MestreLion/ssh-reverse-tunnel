@@ -10,7 +10,6 @@ set -Eeuo pipefail  # exit on any error
 trap '>&2 echo "error: line $LINENO, status $?: $BASH_COMMAND"' ERR
 #------------------------------------------------------------------------------
 
-aliases=()
 autossh=
 
 slug=ssh-socks-proxy  # sync with ssh-socks-proxy.template.*.conf
@@ -29,7 +28,7 @@ invalid()     { argerr "invalid ${2:-option}: ${1:-}"; }
 usage()       {
 	exec >&2
 	echo "Set up a SSH Socks Proxy source host"
-	echo "Usage: ${0##*/} [-a|--autossh] [TARGET_ALIAS(es)...]"
+	echo "Usage: ${0##*/} [-a|--autossh]"
 	echo "Example: ${0##*/} vps"
 	exit "${1:-0}"
 }
@@ -40,19 +39,15 @@ while (($#)); do
 	# shellcheck disable=SC2221,SC2222
 	case "$1" in
 	-a|--autossh) autossh='-autossh';;
-	--) shift; break;;
-	-*) invalid "$1";;
-	 *) aliases+=( "$1" );;
+	 *) invalid "$1";;
 	esac
 	shift || break
 done
-aliases+=( "$@" )
 
 if is_root; then
 	mode=system
 	prefix=/etc
 	service_dir=/etc/systemd/system
-	template=ssh-socks-proxy.template*.conf
 else
 	mode=user
 	xdg_config=${XDG_CONFIG_HOME:-$HOME/.config}
@@ -90,25 +85,13 @@ fi
 cp -- "$here"/"$service"@.service "$service_dir"
 
 # create config file
-
 cp --no-clobber -- "$template" "$config"
 nano -- "$config"
 
-for alias in "${aliases[@]}"; do
-	cp --no-clobber -- "$here"/_template.conf "$base_dir"/"$alias".conf
-	nano -- "$base_dir"/"$alias".conf
-	systemctl "${systemctl_mode[@]}" enable "$service@$alias"
-done
-
-if ((${#aliases[@]})); then
-	echo
-	green "For each server (${aliases[*]}), connect as root (or a sudoer) and run:"
-	echo "git clone https://github.com/MestreLion/ssh-reverse-tunnel"
-	echo "ssh-reverse-tunnel/ssh-socks-proxy/install-server.sh '$(<"$key_file".pub)'"
-	echo
-	green "When you exit the SSH session you may enable and start the services:"
-	(
-		IFS=,
-		echo systemctl "${systemctl_mode[@]}" start "$service@{${aliases[*]}}"
-	)
-fi
+echo
+green "For each target host, connect as root (or a sudoer) and run:"
+echo "git clone https://github.com/MestreLion/ssh-reverse-tunnel"
+echo "ssh-reverse-tunnel/ssh-socks-proxy/install-server.sh '$(<"$key_file".pub)'"
+echo
+green "When you exit the SSH session you may start (and possibly enable) the services:"
+echo systemctl "${systemctl_mode[@]}" start "$service@TARGET_HOST"
