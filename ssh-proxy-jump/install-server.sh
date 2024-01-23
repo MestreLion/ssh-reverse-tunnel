@@ -82,6 +82,7 @@ Match User ${user}
 
 	# Allow binding tunnels and forwarding agents (most likely already the default)
 	GatewayPorts           yes
+	AllowTcpForwarding     local
 	AllowAgentForwarding   yes
 
 	# Disable interactive sessions, for both convenience and security
