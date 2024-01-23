@@ -79,7 +79,7 @@ mkdir --parents -- "$base_dir" "$service_dir"
 
 # Generate SSH keys
 if ! [[ -f "$key_file" ]]; then
-	ssh-keygen -a 100 -t ed25519 -f "$key_file" -N "" -C "$comment"
+	ssh-keygen -a 100 -t "$key_type" -f "$key_file" -N "" -C "$comment"
 fi
 
 # create *.conf files

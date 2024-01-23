@@ -40,7 +40,7 @@ escape()      { printf '%q' "$1"; }
 #------------------------------------------------------------------------------
 
 if [[ -z "$key" ]]; then
-	echo "Sets up a SSH Socks Proxy target host" >&2
+	echo "Sets up an SSH Socks Proxy target host" >&2
 	echo "Usage: ${0##*/} SSH_PUBLIC_KEY_CONTENT" \
 		"[USERNAME [HOME_PREFIX [CONTACT_INFO]]]" >&2
 	exit 1
@@ -54,7 +54,7 @@ if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
 	sudo -u "$user" tee -a >/dev/null -- "$file" <<< "$key"
 fi
 
-# Tune sshd for reverse tunnels
+# Tune sshd for SOCKS proxy
 sudo tee -- /etc/ssh/sshd_config.d/00-ssh-socks-proxy.conf >/dev/null <<EOF
 # SSH Socks Proxy settings
 # https://github.com/MestreLion/ssh-reverse-tunnel
