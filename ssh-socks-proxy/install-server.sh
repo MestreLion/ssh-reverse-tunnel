@@ -81,6 +81,6 @@ Match User ${user}
 	AuthenticationMethods  publickey
 	PermitTTY              no
 
-	# Do not allow binding tunnels
+	# Do not allow binding tunnels to external interfaces
 	GatewayPorts           no
 EOF

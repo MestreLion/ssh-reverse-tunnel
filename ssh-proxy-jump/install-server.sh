@@ -80,8 +80,7 @@ Match User ${user}
 	# Security: Allow only pubkey authentication, disabling passwords
 	AuthenticationMethods  publickey
 
-	# Allow binding tunnels and forwarding agents (most likely already the default)
-	GatewayPorts           yes
+	# Allow TCP and agent forwarding (most likely already the default)
 	AllowTcpForwarding     local
 	AllowAgentForwarding   yes
 
