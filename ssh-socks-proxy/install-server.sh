@@ -55,7 +55,7 @@ if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
 fi
 
 # Tune sshd for SOCKS proxy
-sudo tee -- /etc/ssh/sshd_config.d/00-ssh-socks-proxy.conf >/dev/null <<EOF
+sudo tee -- /etc/ssh/sshd_config.d/10-ssh-socks-proxy.conf >/dev/null <<EOF
 # SSH Socks Proxy settings
 # https://github.com/MestreLion/ssh-reverse-tunnel
 #

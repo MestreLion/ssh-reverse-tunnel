@@ -55,7 +55,7 @@ if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
 fi
 
 # Tune sshd for reverse tunnels
-sudo tee -- /etc/ssh/sshd_config.d/00-ssh-reverse-tunnel.conf >/dev/null <<EOF
+sudo tee -- /etc/ssh/sshd_config.d/10-ssh-reverse-tunnel.conf >/dev/null <<EOF
 # SSH Reverse Tunnel server settings
 # https://github.com/MestreLion/ssh-reverse-tunnel
 #

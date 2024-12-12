@@ -55,7 +55,7 @@ if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
 fi
 
 # Tune sshd for proxy jumps
-sudo tee -- /etc/ssh/sshd_config.d/00-ssh-proxy-jump.conf >/dev/null <<EOF
+sudo tee -- /etc/ssh/sshd_config.d/10-ssh-proxy-jump.conf >/dev/null <<EOF
 # SSH Proxy Jump settings
 # https://github.com/MestreLion/ssh-reverse-tunnel
 #
