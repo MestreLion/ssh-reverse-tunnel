@@ -81,7 +81,4 @@ Match User ${user}
 	AllowAgentForwarding   no
 	AuthenticationMethods  publickey
 	PermitTTY              no
-
-	# Allow binding tunnels to all interfaces instead of localhost only
-	GatewayPorts           yes
 EOF
