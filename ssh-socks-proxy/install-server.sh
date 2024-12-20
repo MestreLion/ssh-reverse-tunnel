@@ -84,3 +84,4 @@ Match User ${user}
 	# Do not allow binding tunnels to external interfaces
 	GatewayPorts           no
 EOF
+sudo systemctl reload-or-restart sshd.service
