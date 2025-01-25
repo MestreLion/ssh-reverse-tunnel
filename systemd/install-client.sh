@@ -89,8 +89,11 @@ cp -- "$here"/*.conf "$base_dir"
 cp -- "$here"/"$service"@.service "$service_dir"
 
 for alias in "${aliases[@]}"; do
-	cp --no-clobber -- "$here"/_template.conf "$base_dir"/"$alias".conf
-	nano -- "$base_dir"/"$alias".conf
+	conf=${base_dir}/${alias}.conf
+	if ! [[ -f "$conf" ]]; then
+		cp --no-clobber -- "$here"/_template.conf "$conf"
+		nano -- "$conf"
+	fi
 	systemctl "${systemctl_mode[@]}" enable "$service@$alias"
 done
 
