@@ -37,13 +37,20 @@ useropts=(
 user_home()   { getent passwd -- "${1:-$USER}" | cut -d: -f6; }
 user_exists() { getent passwd -- "${1:-}" >/dev/null; }
 escape()      { printf '%q' "$1"; }
+usage() {
+	local status=${1:-0}
+	if ((status)); then exec >&2; fi
+	echo "Sets up a server for SSH Reverse Tunnel"
+	echo "Usage: ${0##*/} SSH_PUBLIC_KEY_CONTENT" \
+		"[USERNAME [HOME_PREFIX [CONTACT_INFO]]]"
+	exit "$status"
+}
 #------------------------------------------------------------------------------
 
+for arg in "$@"; do [[ "$arg" == "-h" || "$arg" == "--help" ]] && usage; done
 if [[ -z "$key" ]]; then
-	echo "Sets up a server for SSH Reverse Tunnel" >&2
-	echo "Usage: ${0##*/} SSH_PUBLIC_KEY_CONTENT" \
-		"[USERNAME [HOME_PREFIX [CONTACT_INFO]]]" >&2
-	exit 1
+	echo "Error: Argument SSH_PUBLIC_KEY_CONTENT is missing" >&2
+	usage 1
 fi
 
 # Create and setup up user
