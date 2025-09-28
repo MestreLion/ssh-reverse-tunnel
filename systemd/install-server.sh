@@ -61,6 +61,13 @@ if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
 	sudo -u "$user" tee -a >/dev/null -- "$file" <<< "$key"
 fi
 
+# Add $prefix to snapd to avoid snapd-desktop-integration apparmor audit errors
+# '/home' is always included, '/etc' is not allowed
+# See https://snapcraft.io/docs/home-outside-home
+if ! [[ "$prefix" == /home ]] && ! [[ "$prefix" == /etc ]]; then
+	sudo snap set system homedirs="$prefix"
+fi
+
 # Tune sshd for reverse tunnels
 sudo tee -- /etc/ssh/sshd_config.d/10-ssh-reverse-tunnel.conf >/dev/null <<EOF
 # SSH Reverse Tunnel server settings
