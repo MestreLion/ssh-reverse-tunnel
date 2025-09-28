@@ -17,7 +17,7 @@ key=${1:-}
 user=${2:-ssh-reverse-tunnel}
 
 # Service account home prefix (its $HOME parent directory)
-prefix=${3-/etc}
+prefix=${3-/var/lib}
 
 # Contact info (no commas or semi-colons)
 contact=${4:-github.com/MestreLion/ssh-reverse-tunnel}
