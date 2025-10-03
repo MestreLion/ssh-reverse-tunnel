@@ -23,15 +23,19 @@ prefix=${3-/var/lib}
 contact=${4:-github.com/MestreLion/ssh-reverse-tunnel}
 contact=${contact//:/}; contact=${contact//,/};
 
+# Also no commas or semi-colons
+fullname='SSH Reverse Tunnel service account'
+
 #------------------------------------------------------------------------------
 home=$prefix/$user
 file=$home/authorized_keys
+gecos="${fullname},,,,${contact}"
 useropts=(
 	--system  # implies --shell /usr/sbin/nologin
 	--group   # create its group, otherwise system users are put in nogroup
 	--quiet   # no error if system user already exists
 	--home "$home"  # default is /home/<USER> even for system users
-	--gecos "SSH Reverse Tunnel service account,,,,$contact"
+	--gecos "$gecos"
 )
 #------------------------------------------------------------------------------
 user_home()   { getent passwd -- "${1:-$USER}" | cut -d: -f6; }
@@ -54,7 +58,12 @@ if [[ -z "$key" ]]; then
 fi
 
 # Create and setup up user
-if ! user_exists "$user"; then sudo adduser "${useropts[@]}" -- "$user"; fi
+if user_exists "$user"; then
+	sudo pkill -u "$user"
+	sudo usermod --home "$home" --move-home --comment "$gecos"
+else
+	sudo adduser "${useropts[@]}" -- "$user"
+fi
 home=$(user_home "$user")  # might be different than specified if already existed
 sudo -u "$user" mkdir -p -- "${file%/*}"
 if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
@@ -83,6 +92,7 @@ sudo tee -- /etc/ssh/sshd_config.d/10-ssh-reverse-tunnel.conf >/dev/null <<EOF
 
 Match User ${user}
 	# Configurable and not bound to be the default ~/.ssh/authorized_keys
+	# Relative to the user's HOME $(escape "$home")
 	AuthorizedKeysFile     $(escape "${file#$home/}")
 
 	# Disconnect if client is unresponsive for 3 * 15 = 45 seconds.
