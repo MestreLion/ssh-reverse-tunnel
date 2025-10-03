@@ -57,8 +57,11 @@ for arg in "$@"; do [[ "$arg" == "-h" || "$arg" == "--help" ]] && usage; done
 if user_exists "$user"; then
 	if [[ "$(user_home "$user")" != "$home" ]]; then
 		echo "User $user already exists, moving its HOME to $home"
-		sudo pkill -u "$user"
-		sudo usermod --home "$home" --move-home --comment "$gecos"
+		sudo pkill -u "$user" || :
+		if ! sudo usermod --home "$home" --move-home --comment "$gecos" -- "$user"; then
+			echo "Error moving $user HOME. Close any running tunnels and try again" >&2
+			exit 1
+		fi
 		home=$(user_home "$user")
 	fi
 else
