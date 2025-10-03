@@ -59,16 +59,23 @@ fi
 
 # Create and setup up user
 if user_exists "$user"; then
-	sudo pkill -u "$user"
-	sudo usermod --home "$home" --move-home --comment "$gecos"
+	if [[ "$(user_home "$user")" != "$home" ]]; then
+		echo "User $user already exists, moving its HOME to $home"
+		sudo pkill -u "$user"
+		sudo usermod --home "$home" --move-home --comment "$gecos"
+		home=$(user_home "$user")
+	fi
 else
 	sudo adduser "${useropts[@]}" -- "$user"
 fi
-home=$(user_home "$user")  # might be different than specified if already existed
-sudo -u "$user" mkdir -p -- "${file%/*}"
-if ! [[ -f "$file" ]] || ! grep -Fx -- "$key" "$file"; then
+if ! sudo -u "$user" grep -qFx -- "$key" "$file"; then
+	sudo -u "$user" mkdir -p -- "${file%/*}"
 	sudo -u "$user" tee -a >/dev/null -- "$file" <<< "$key"
 fi
+
+# Make sure file exists with propoer permissions
+sudo -u "$user" touch -- "$file"
+sudo -u "$user" chmod 600 -- "$file"
 
 # Add $prefix to snapd to avoid snapd-desktop-integration apparmor audit errors
 # '/home' is always included, '/etc' is not allowed
