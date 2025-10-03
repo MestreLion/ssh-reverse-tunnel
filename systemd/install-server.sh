@@ -45,17 +45,13 @@ usage() {
 	local status=${1:-0}
 	if ((status)); then exec >&2; fi
 	echo "Sets up a server for SSH Reverse Tunnel"
-	echo "Usage: ${0##*/} SSH_PUBLIC_KEY_CONTENT" \
+	echo "Usage: ${0##*/} [SSH_PUBLIC_KEY_CONTENT]" \
 		"[USERNAME [HOME_PREFIX [CONTACT_INFO]]]"
 	exit "$status"
 }
 #------------------------------------------------------------------------------
 
 for arg in "$@"; do [[ "$arg" == "-h" || "$arg" == "--help" ]] && usage; done
-if [[ -z "$key" ]]; then
-	echo "Error: Argument SSH_PUBLIC_KEY_CONTENT is missing" >&2
-	usage 1
-fi
 
 # Create and setup up user
 if user_exists "$user"; then
@@ -68,9 +64,16 @@ if user_exists "$user"; then
 else
 	sudo adduser "${useropts[@]}" -- "$user"
 fi
-if ! sudo -u "$user" grep -qFx -- "$key" "$file"; then
-	sudo -u "$user" mkdir -p -- "${file%/*}"
-	sudo -u "$user" tee -a >/dev/null -- "$file" <<< "$key"
+
+# Setup authorized_keys file
+if [[ "$key" ]]; then
+	if ! sudo -u "$user" grep -qFx -- "$key" "$file"; then
+		sudo -u "$user" mkdir -p -- "${file%/*}"
+		sudo -u "$user" tee -a >/dev/null -- "$file" <<< "$key"
+	fi
+else
+	echo "Warning: no keys to add to ${file}." \
+		"If it is empty, no remote host will be able to create reverse tunnels"
 fi
 
 # Make sure file exists with propoer permissions
